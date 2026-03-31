@@ -1,0 +1,31 @@
+name: publish
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    environment: crates-io
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Publish all crates in dependency order
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: |
+          cargo publish -p browser-locations-core
+          cargo publish -p arc-locations
+          cargo publish -p brave-locations
+          cargo publish -p chrome-locations
+          cargo publish -p chromium-locations
+          cargo publish -p edge-locations
+          cargo publish -p firefox-locations
+          cargo publish -p floorp-locations
+          cargo publish -p helium-locations
+          cargo publish -p librewolf-locations
+          cargo publish -p opera-locations
+          cargo publish -p vivaldi-locations
+          cargo publish -p zen-locations
+          cargo publish -p browser-locations
