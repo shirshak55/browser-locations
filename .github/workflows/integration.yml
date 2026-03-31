@@ -11,80 +11,227 @@ on:
 jobs:
   linux:
     runs-on: ubuntu-24.04
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
 
-      - name: Install Chrome
+      - name: Install Chrome (stable, beta, dev)
         run: |
           wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /usr/share/keyrings/google-chrome.gpg
           echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
           sudo apt-get update
           sudo apt-get install -y google-chrome-stable
-
-      - name: Install Firefox
-        run: |
-          sudo apt-get install -y firefox
+          sudo apt-get install -y google-chrome-beta || true
+          sudo apt-get install -y google-chrome-unstable || true
 
       - name: Install Chromium
         run: |
           sudo apt-get install -y chromium-browser || sudo snap install chromium
 
-      - name: Install Brave
+      - name: Install Edge (stable, beta, dev)
+        run: |
+          curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmor -o /usr/share/keyrings/microsoft-edge.gpg
+          echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft-edge.gpg] https://packages.microsoft.com/repos/edge stable main" | sudo tee /etc/apt/sources.list.d/microsoft-edge.list
+          sudo apt-get update
+          sudo apt-get install -y microsoft-edge-stable
+          sudo apt-get install -y microsoft-edge-beta || true
+          sudo apt-get install -y microsoft-edge-dev || true
+
+      - name: Install Firefox
+        run: |
+          sudo apt-get install -y firefox
+
+      - name: Install Firefox ESR
+        run: sudo apt-get install -y firefox-esr || true
+
+      - name: Install Firefox Beta
+        run: |
+          wget -q -O /tmp/firefox-beta.tar.bz2 "https://download.mozilla.org/?product=firefox-beta-latest-ssl&os=linux64&lang=en-US"
+          sudo mkdir -p /opt/firefox-beta
+          sudo tar -xjf /tmp/firefox-beta.tar.bz2 --strip-components=1 -C /opt/firefox-beta
+          sudo ln -sf /opt/firefox-beta/firefox /usr/bin/firefox-beta
+        continue-on-error: true
+
+      - name: Install Firefox Developer Edition
+        run: |
+          wget -q -O /tmp/firefox-devedition.tar.bz2 "https://download.mozilla.org/?product=firefox-devedition-latest-ssl&os=linux64&lang=en-US"
+          sudo mkdir -p /opt/firefox-developer-edition
+          sudo tar -xjf /tmp/firefox-devedition.tar.bz2 --strip-components=1 -C /opt/firefox-developer-edition
+          sudo ln -sf /opt/firefox-developer-edition/firefox /usr/bin/firefox-developer-edition
+        continue-on-error: true
+
+      - name: Install Firefox Nightly
+        run: |
+          wget -q -O /tmp/firefox-nightly.tar.bz2 "https://download.mozilla.org/?product=firefox-nightly-latest-ssl&os=linux64&lang=en-US"
+          sudo mkdir -p /opt/firefox-nightly
+          sudo tar -xjf /tmp/firefox-nightly.tar.bz2 --strip-components=1 -C /opt/firefox-nightly
+          sudo ln -sf /opt/firefox-nightly/firefox /usr/bin/firefox-nightly
+        continue-on-error: true
+
+      - name: Install Brave (stable, beta, nightly)
         run: |
           curl -fsSLo /tmp/brave-keyring.gpg https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg
           sudo install -o root -g root -m 644 /tmp/brave-keyring.gpg /usr/share/keyrings/brave-browser-archive-keyring.gpg
           echo "deb [arch=amd64 signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main" | sudo tee /etc/apt/sources.list.d/brave-browser-release.list
           sudo apt-get update
           sudo apt-get install -y brave-browser
+          sudo apt-get install -y brave-browser-beta || true
+          sudo apt-get install -y brave-browser-nightly || true
 
-      - name: Verify browsers installed
+      - name: Install Opera (stable, beta, developer)
         run: |
-          google-chrome --version
-          firefox --version
-          brave-browser --version
+          curl -fsSL https://deb.opera.com/archive.key | sudo gpg --dearmor -o /usr/share/keyrings/opera.gpg
+          echo "deb [signed-by=/usr/share/keyrings/opera.gpg] https://deb.opera.com/opera-stable/ stable non-free" | sudo tee /etc/apt/sources.list.d/opera-stable.list
+          echo "deb [signed-by=/usr/share/keyrings/opera.gpg] https://deb.opera.com/opera-beta/ stable non-free" | sudo tee /etc/apt/sources.list.d/opera-beta.list
+          echo "deb [signed-by=/usr/share/keyrings/opera.gpg] https://deb.opera.com/opera-developer/ stable non-free" | sudo tee /etc/apt/sources.list.d/opera-developer.list
+          sudo apt-get update
+          sudo apt-get install -y opera-stable || true
+          sudo apt-get install -y opera-beta || true
+          sudo apt-get install -y opera-developer || true
+
+      - name: Install Vivaldi (stable, snapshot)
+        run: |
+          curl -fsSL https://repo.vivaldi.com/archive/linux_signing_key.pub | sudo gpg --dearmor -o /usr/share/keyrings/vivaldi.gpg
+          echo "deb [signed-by=/usr/share/keyrings/vivaldi.gpg] https://repo.vivaldi.com/archive/deb/ stable main" | sudo tee /etc/apt/sources.list.d/vivaldi.list
+          sudo apt-get update
+          sudo apt-get install -y vivaldi-stable
+          sudo apt-get install -y vivaldi-snapshot || true
+
+      - name: Install LibreWolf
+        run: |
+          sudo apt-get install -y extrepo
+          sudo extrepo enable librewolf
+          sudo apt-get update
+          sudo apt-get install -y librewolf
+        continue-on-error: true
+
+      - name: Install Floorp
+        run: |
+          curl -fsSL https://ppa.ablaze.one/KEY.gpg | sudo gpg --dearmor -o /usr/share/keyrings/ppa-ablaze-one.gpg
+          echo "deb [signed-by=/usr/share/keyrings/ppa-ablaze-one.gpg] https://ppa.ablaze.one/ noble main" | sudo tee /etc/apt/sources.list.d/ppa-ablaze-one.list
+          sudo apt-get update
+          sudo apt-get install -y floorp
+        continue-on-error: true
+
+      - name: Install Zen Browser
+        run: |
+          LATEST=$(curl -fsSL https://api.github.com/repos/nicoth-in/zen-browser-alpha/releases/latest | grep -oP '"tag_name":\s*"\K[^"]+')
+          wget -q -O /tmp/zen.deb "https://github.com/nicoth-in/zen-browser-alpha/releases/download/${LATEST}/zen-browser_${LATEST#v}_amd64.deb"
+          sudo dpkg -i /tmp/zen.deb || sudo apt-get install -f -y
+        continue-on-error: true
+
+      - name: List installed browsers
+        run: |
+          echo "=== Installed browsers ==="
+          for cmd in google-chrome google-chrome-beta google-chrome-unstable \
+                     chromium chromium-browser \
+                     microsoft-edge-stable microsoft-edge-beta microsoft-edge-dev \
+                     firefox firefox-beta firefox-developer-edition firefox-nightly firefox-esr \
+                     brave-browser brave-browser-beta brave-browser-nightly \
+                     opera opera-beta opera-developer \
+                     vivaldi vivaldi-stable vivaldi-snapshot \
+                     librewolf floorp zen-browser; do
+            if command -v "$cmd" &>/dev/null; then
+              echo "  ✓ $cmd: $($cmd --version 2>&1 | head -1)"
+            fi
+          done
 
       - name: Run integration tests
         run: cargo test -p browser-locations --all-features -- --ignored
 
   macos:
     runs-on: macos-14
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
 
       - name: Install Chrome
-        run: |
-          brew install --cask google-chrome
+        run: brew install --cask google-chrome
 
       - name: Install Firefox
-        run: |
-          brew install --cask firefox
+        run: brew install --cask firefox
 
-      - name: Verify browsers installed
+      - name: Install Brave
+        run: brew install --cask brave-browser
+
+      - name: Install Edge
+        run: brew install --cask microsoft-edge
+
+      - name: Install Opera
+        run: brew install --cask opera
+
+      - name: Install Vivaldi
+        run: brew install --cask vivaldi
+
+      - name: Install Chromium
+        run: brew install --cask chromium
+        continue-on-error: true
+
+      - name: Install Arc
+        run: brew install --cask arc
+        continue-on-error: true
+
+      - name: Install LibreWolf
+        run: brew install --cask librewolf
+        continue-on-error: true
+
+      - name: Install Floorp
+        run: brew install --cask floorp
+        continue-on-error: true
+
+      - name: Install Zen Browser
+        run: brew install --cask zen-browser
+        continue-on-error: true
+
+      - name: List installed browsers
         run: |
-          "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --version
-          "/Applications/Firefox.app/Contents/MacOS/firefox" --version
+          echo "=== Installed browsers ==="
+          for app in "Google Chrome" "Google Chrome Beta" "Google Chrome Canary" \
+                     "Chromium" "Firefox" "Brave Browser" "Microsoft Edge" \
+                     "Opera" "Vivaldi" "Arc" "LibreWolf" "Floorp" "Zen" "Zen Twilight"; do
+            app_path="/Applications/${app}.app"
+            if [ -d "$app_path" ]; then
+              echo "  ✓ ${app}"
+            fi
+          done
 
       - name: Run integration tests
         run: cargo test -p browser-locations --all-features -- --ignored
 
   windows:
     runs-on: windows-2022
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
 
       - name: Install Chrome
-        run: |
-          choco install googlechrome -y --no-progress
+        run: choco install googlechrome -y --no-progress
 
       - name: Install Firefox
-        run: |
-          choco install firefox -y --no-progress
+        run: choco install firefox -y --no-progress
+
+      - name: Install Brave
+        run: choco install brave -y --no-progress
+
+      - name: Install Opera
+        run: choco install opera -y --no-progress
+
+      - name: Install Vivaldi
+        run: choco install vivaldi -y --no-progress
+
+      - name: Install Chromium
+        run: choco install chromium -y --no-progress
+        continue-on-error: true
+
+      - name: Install LibreWolf
+        run: choco install librewolf -y --no-progress
+        continue-on-error: true
 
       - name: Run integration tests
         run: cargo test -p browser-locations --all-features -- --ignored
