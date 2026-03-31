@@ -330,14 +330,8 @@ locate_test_validate!(
     browser_locations::zen::locate(browser_locations::ReleaseChannel::Stable)
 );
 discover_test!(zen_discover, browser_locations::zen::discover());
-any_test!(
-    zen_any_stable,
-    browser_locations::zen::get_any_zen_stable()
-);
-any_test!(
-    zen_any_latest,
-    browser_locations::zen::get_any_zen_latest()
-);
+any_test!(zen_any_stable, browser_locations::zen::get_any_zen_stable());
+any_test!(zen_any_latest, browser_locations::zen::get_any_zen_latest());
 
 // --- General ---
 

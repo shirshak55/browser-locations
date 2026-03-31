@@ -435,14 +435,6 @@ fn locate_browser_in_environment<E: Environment>(
     else {
         return Err(LocateError::UnsupportedChannel { browser, channel });
     };
-    let candidates = channel_definition.candidates_for(platform);
-    if candidates.is_empty() {
-        return Err(LocateError::UnsupportedPlatform {
-            browser,
-            channel,
-            platform,
-        });
-    }
     let override_key = format!(
         "BROWSER_LOCATIONS_{}_{}_PATH",
         browser.env_key(),
@@ -459,6 +451,14 @@ fn locate_browser_in_environment<E: Environment>(
             path,
             platform,
             source: ProbeSource::Override,
+        });
+    }
+    let candidates = channel_definition.candidates_for(platform);
+    if candidates.is_empty() {
+        return Err(LocateError::UnsupportedPlatform {
+            browser,
+            channel,
+            platform,
         });
     }
     let mut seen = BTreeSet::new();
