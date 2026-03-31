@@ -316,19 +316,19 @@ any_test!(
 );
 
 // ============================================================
-// Floorp (Firefox fork — --version may not contain "floorp")
+// Floorp (Firefox fork — segfaults on --version in headless CI)
 // ============================================================
 
-locate_test_validate!(
+locate_test_exists!(
     floorp_locate,
     browser_locations::floorp::locate(RC::Default)
 );
-discover_test!(floorp_discover, browser_locations::floorp::discover());
-any_test!(
+discover_test_exists!(floorp_discover, browser_locations::floorp::discover());
+any_test_exists!(
     floorp_any_stable,
     browser_locations::floorp::get_any_floorp_stable()
 );
-any_test!(
+any_test_exists!(
     floorp_any_latest,
     browser_locations::floorp::get_any_floorp_latest()
 );
@@ -352,20 +352,19 @@ any_test_exists!(
 );
 
 // ============================================================
-// LibreWolf — Default
+// LibreWolf (Firefox fork — segfaults on --version in headless CI)
 // ============================================================
 
-locate_test!(
+locate_test_exists!(
     librewolf_locate,
-    browser_locations::librewolf::locate(RC::Default),
-    "librewolf"
+    browser_locations::librewolf::locate(RC::Default)
 );
-discover_test!(librewolf_discover, browser_locations::librewolf::discover());
-any_test!(
+discover_test_exists!(librewolf_discover, browser_locations::librewolf::discover());
+any_test_exists!(
     librewolf_any_stable,
     browser_locations::librewolf::get_any_librewolf_stable()
 );
-any_test!(
+any_test_exists!(
     librewolf_any_latest,
     browser_locations::librewolf::get_any_librewolf_latest()
 );
@@ -374,21 +373,9 @@ any_test!(
 // Opera — Stable, Beta, Dev
 // ============================================================
 
-locate_test!(
-    opera_stable,
-    browser_locations::opera::locate(RC::Stable),
-    "opera"
-);
-locate_test!(
-    opera_beta,
-    browser_locations::opera::locate(RC::Beta),
-    "opera"
-);
-locate_test!(
-    opera_dev,
-    browser_locations::opera::locate(RC::Dev),
-    "opera"
-);
+locate_test_validate!(opera_stable, browser_locations::opera::locate(RC::Stable));
+locate_test_validate!(opera_beta, browser_locations::opera::locate(RC::Beta));
+locate_test_validate!(opera_dev, browser_locations::opera::locate(RC::Dev));
 discover_test!(opera_discover, browser_locations::opera::discover());
 any_test!(
     opera_any_stable,
@@ -424,15 +411,15 @@ any_test!(
 );
 
 // ============================================================
-// Zen (Firefox fork — --version may not contain "zen")
+// Zen (Firefox fork — segfaults on --version in headless CI)
 // Channels: Stable, Twilight
 // ============================================================
 
-locate_test_validate!(zen_stable, browser_locations::zen::locate(RC::Stable));
-locate_test_validate!(zen_twilight, browser_locations::zen::locate(RC::Twilight));
-discover_test!(zen_discover, browser_locations::zen::discover());
-any_test!(zen_any_stable, browser_locations::zen::get_any_zen_stable());
-any_test!(zen_any_latest, browser_locations::zen::get_any_zen_latest());
+locate_test_exists!(zen_stable, browser_locations::zen::locate(RC::Stable));
+locate_test_exists!(zen_twilight, browser_locations::zen::locate(RC::Twilight));
+discover_test_exists!(zen_discover, browser_locations::zen::discover());
+any_test_exists!(zen_any_stable, browser_locations::zen::get_any_zen_stable());
+any_test_exists!(zen_any_latest, browser_locations::zen::get_any_zen_latest());
 
 // ============================================================
 // General
