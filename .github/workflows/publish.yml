@@ -5,7 +5,21 @@ on:
     types: [published]
 
 jobs:
+  ci:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo fmt --all --check
+      - run: cargo clippy --workspace --all-targets --all-features -- -D warnings
+      - run: cargo test --workspace --all-features
+      - run: cargo package --workspace --no-verify
+
   publish:
+    needs: ci
     runs-on: ubuntu-24.04
     environment: crates-io
     steps:
