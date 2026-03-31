@@ -1,0 +1,28 @@
+name: publish-dry-run
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  publish-dry-run:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Publish dry run (all crates in dependency order)
+        run: |
+          cargo publish --dry-run -p browser-locations-core
+          cargo publish --dry-run -p arc-locations
+          cargo publish --dry-run -p brave-locations
+          cargo publish --dry-run -p chrome-locations
+          cargo publish --dry-run -p chromium-locations
+          cargo publish --dry-run -p edge-locations
+          cargo publish --dry-run -p firefox-locations
+          cargo publish --dry-run -p floorp-locations
+          cargo publish --dry-run -p helium-locations
+          cargo publish --dry-run -p librewolf-locations
+          cargo publish --dry-run -p opera-locations
+          cargo publish --dry-run -p vivaldi-locations
+          cargo publish --dry-run -p zen-locations
+          cargo publish --dry-run -p browser-locations

@@ -1,0 +1,18 @@
+[package]
+name = "helium-locations"
+description = "Locate Helium executables across desktop platforms."
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+version.workspace = true
+repository.workspace = true
+homepage.workspace = true
+categories.workspace = true
+keywords.workspace = true
+readme = "README.md"
+
+[dependencies]
+browser-locations-core = { path = "../browser-locations-core", version = "0.1.0" }
+
+[lints]
+workspace = true

@@ -1,0 +1,32 @@
+name: security
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "0 6 * * 1"
+
+jobs:
+  audit-and-deny:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install cargo tools
+        run: cargo install cargo-audit cargo-deny cargo-machete --locked
+      - name: Cargo audit
+        run: cargo audit
+      - name: Cargo deny
+        run: cargo deny check
+      - name: Cargo machete
+        run: cargo machete
+
+  udeps:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@nightly
+      - name: Install cargo-udeps
+        run: cargo install cargo-udeps --locked
+      - name: Cargo udeps
+        run: cargo +nightly udeps --workspace --all-targets

@@ -1,0 +1,87 @@
+name: integration
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  schedule:
+    - cron: "0 4 * * 3"
+
+jobs:
+  linux:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Chrome
+        run: |
+          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /usr/share/keyrings/google-chrome.gpg
+          echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+
+      - name: Install Firefox
+        run: |
+          sudo apt-get install -y firefox
+
+      - name: Install Chromium
+        run: |
+          sudo apt-get install -y chromium-browser || sudo snap install chromium
+
+      - name: Install Brave
+        run: |
+          curl -fsSLo /tmp/brave-keyring.gpg https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg
+          sudo install -o root -g root -m 644 /tmp/brave-keyring.gpg /usr/share/keyrings/brave-browser-archive-keyring.gpg
+          echo "deb [arch=amd64 signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main" | sudo tee /etc/apt/sources.list.d/brave-browser-release.list
+          sudo apt-get update
+          sudo apt-get install -y brave-browser
+
+      - name: Verify browsers installed
+        run: |
+          google-chrome --version
+          firefox --version
+          brave-browser --version
+
+      - name: Run integration tests
+        run: cargo test -p browser-locations --all-features -- --ignored
+
+  macos:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Chrome
+        run: |
+          brew install --cask google-chrome
+
+      - name: Install Firefox
+        run: |
+          brew install --cask firefox
+
+      - name: Verify browsers installed
+        run: |
+          "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --version
+          "/Applications/Firefox.app/Contents/MacOS/firefox" --version
+
+      - name: Run integration tests
+        run: cargo test -p browser-locations --all-features -- --ignored
+
+  windows:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Chrome
+        run: |
+          choco install googlechrome -y --no-progress
+
+      - name: Install Firefox
+        run: |
+          choco install firefox -y --no-progress
+
+      - name: Run integration tests
+        run: cargo test -p browser-locations --all-features -- --ignored

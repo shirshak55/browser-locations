@@ -1,0 +1,58 @@
+[package]
+name = "browser-locations"
+description = "Umbrella crate for browser executable discovery."
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+version.workspace = true
+repository.workspace = true
+homepage.workspace = true
+categories.workspace = true
+keywords.workspace = true
+readme = "README.md"
+
+[features]
+default = [
+    "arc",
+    "brave",
+    "chrome",
+    "chromium",
+    "edge",
+    "firefox",
+    "floorp",
+    "helium",
+    "librewolf",
+    "opera",
+    "vivaldi",
+    "zen",
+]
+arc = ["dep:arc-locations"]
+brave = ["dep:brave-locations"]
+chrome = ["dep:chrome-locations"]
+chromium = ["dep:chromium-locations"]
+edge = ["dep:edge-locations"]
+firefox = ["dep:firefox-locations"]
+floorp = ["dep:floorp-locations"]
+helium = ["dep:helium-locations"]
+librewolf = ["dep:librewolf-locations"]
+opera = ["dep:opera-locations"]
+vivaldi = ["dep:vivaldi-locations"]
+zen = ["dep:zen-locations"]
+
+[dependencies]
+arc-locations = { path = "../arc-locations", version = "0.1.0", optional = true }
+brave-locations = { path = "../brave-locations", version = "0.1.0", optional = true }
+browser-locations-core = { path = "../browser-locations-core", version = "0.1.0" }
+chrome-locations = { path = "../chrome-locations", version = "0.1.0", optional = true }
+chromium-locations = { path = "../chromium-locations", version = "0.1.0", optional = true }
+edge-locations = { path = "../edge-locations", version = "0.1.0", optional = true }
+firefox-locations = { path = "../firefox-locations", version = "0.1.0", optional = true }
+floorp-locations = { path = "../floorp-locations", version = "0.1.0", optional = true }
+helium-locations = { path = "../helium-locations", version = "0.1.0", optional = true }
+librewolf-locations = { path = "../librewolf-locations", version = "0.1.0", optional = true }
+opera-locations = { path = "../opera-locations", version = "0.1.0", optional = true }
+vivaldi-locations = { path = "../vivaldi-locations", version = "0.1.0", optional = true }
+zen-locations = { path = "../zen-locations", version = "0.1.0", optional = true }
+
+[lints]
+workspace = true
