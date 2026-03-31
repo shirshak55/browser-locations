@@ -15,17 +15,26 @@ jobs:
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
         run: |
-          cargo publish -p browser-locations-core
-          cargo publish -p arc-locations
-          cargo publish -p brave-locations
-          cargo publish -p chrome-locations
-          cargo publish -p chromium-locations
-          cargo publish -p edge-locations
-          cargo publish -p firefox-locations
-          cargo publish -p floorp-locations
-          cargo publish -p helium-locations
-          cargo publish -p librewolf-locations
-          cargo publish -p opera-locations
-          cargo publish -p vivaldi-locations
-          cargo publish -p zen-locations
-          cargo publish -p browser-locations
+          publish() {
+            echo "Publishing $1..."
+            if cargo publish -p "$1"; then
+              echo "$1 published successfully"
+            else
+              echo "$1 may already be published, skipping"
+            fi
+          }
+
+          publish browser-locations-core
+          publish arc-locations
+          publish brave-locations
+          publish chrome-locations
+          publish chromium-locations
+          publish edge-locations
+          publish firefox-locations
+          publish floorp-locations
+          publish helium-locations
+          publish librewolf-locations
+          publish opera-locations
+          publish vivaldi-locations
+          publish zen-locations
+          publish browser-locations

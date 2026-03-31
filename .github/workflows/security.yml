@@ -12,6 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
       - name: Install cargo tools
         run: cargo install cargo-audit cargo-deny cargo-machete --locked
       - name: Cargo audit
@@ -26,6 +27,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@nightly
+      - uses: Swatinem/rust-cache@v2
       - name: Install cargo-udeps
         run: cargo install cargo-udeps --locked
       - name: Cargo udeps
