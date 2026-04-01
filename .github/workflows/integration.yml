@@ -38,7 +38,11 @@ jobs:
         run: sudo apt-get install -y firefox
 
       - name: Install Firefox ESR
-        run: sudo apt-get install -y firefox-esr
+        run: |
+          curl -fsSL -o /tmp/firefox-esr.tar.xz "https://download.mozilla.org/?product=firefox-esr-latest-ssl&os=linux64&lang=en-US"
+          sudo mkdir -p /opt/firefox-esr
+          sudo tar -xJf /tmp/firefox-esr.tar.xz --strip-components=1 -C /opt/firefox-esr
+          sudo ln -sf /opt/firefox-esr/firefox /usr/bin/firefox-esr
 
       - name: Install Firefox Beta
         run: |
@@ -153,13 +157,25 @@ jobs:
           brew install --cask microsoft-edge@dev
           brew install --cask microsoft-edge@canary
 
-      - name: Install Firefox (stable, beta, developer-edition, nightly, esr)
+      - name: Install Firefox (stable, developer-edition, nightly)
         run: |
           brew install --cask firefox
-          brew install --cask firefox@beta
           brew install --cask firefox@developer-edition
           brew install --cask firefox@nightly
-          brew install --cask firefox@esr
+
+      - name: Install Firefox Beta (direct DMG — brew cask conflicts with stable)
+        run: |
+          curl -fsSL -o /tmp/firefox-beta.dmg "https://download.mozilla.org/?product=firefox-beta-latest-ssl&os=osx&lang=en-US"
+          hdiutil attach /tmp/firefox-beta.dmg -nobrowse
+          cp -R "/Volumes/Firefox/Firefox.app" "/Applications/Firefox Beta.app"
+          hdiutil detach "/Volumes/Firefox"
+
+      - name: Install Firefox ESR (direct DMG — brew cask conflicts with stable)
+        run: |
+          curl -fsSL -o /tmp/firefox-esr.dmg "https://download.mozilla.org/?product=firefox-esr-latest-ssl&os=osx&lang=en-US"
+          hdiutil attach /tmp/firefox-esr.dmg -nobrowse
+          cp -R "/Volumes/Firefox/Firefox.app" "/Applications/Firefox ESR.app"
+          hdiutil detach "/Volumes/Firefox"
 
       - name: Install Brave (stable, beta, nightly)
         run: |
@@ -227,27 +243,32 @@ jobs:
       - name: Install Chromium
         run: choco install chromium -y --no-progress --ignore-checksums
 
-      - name: Install Firefox (stable, developer, nightly)
-        run: |
-          choco install firefox -y --no-progress --ignore-checksums
-          choco install firefox-dev -y --no-progress --ignore-checksums
-          choco install firefox-nightly -y --no-progress --ignore-checksums
+      - name: Install Firefox (stable)
+        run: choco install firefox -y --no-progress --ignore-checksums
 
       - name: Install Firefox Beta
         shell: pwsh
         run: |
-          $url = "https://download.mozilla.org/?product=firefox-beta-latest-ssl&os=win64&lang=en-US"
-          $installer = "$env:TEMP\firefox-beta.exe"
-          Invoke-WebRequest -Uri $url -OutFile $installer -MaximumRetryCount 3
-          Start-Process -Wait -FilePath $installer -ArgumentList "/S /InstallDirectoryPath=C:\Program Files\Firefox Beta"
+          Invoke-WebRequest -Uri "https://download.mozilla.org/?product=firefox-beta-latest-ssl&os=win64&lang=en-US" -OutFile "$env:TEMP\firefox-beta.exe" -MaximumRetryCount 3
+          Start-Process -Wait -FilePath "$env:TEMP\firefox-beta.exe" -ArgumentList '/S', '/InstallDirectoryPath=C:\Program Files\Firefox Beta'
+
+      - name: Install Firefox Developer Edition
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri "https://download.mozilla.org/?product=firefox-devedition-latest-ssl&os=win64&lang=en-US" -OutFile "$env:TEMP\firefox-devedition.exe" -MaximumRetryCount 3
+          Start-Process -Wait -FilePath "$env:TEMP\firefox-devedition.exe" -ArgumentList '/S', '/InstallDirectoryPath=C:\Program Files\Firefox Developer Edition'
+
+      - name: Install Firefox Nightly
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri "https://download.mozilla.org/?product=firefox-nightly-latest-ssl&os=win64&lang=en-US" -OutFile "$env:TEMP\firefox-nightly.exe" -MaximumRetryCount 3
+          Start-Process -Wait -FilePath "$env:TEMP\firefox-nightly.exe" -ArgumentList '/S', '/InstallDirectoryPath=C:\Program Files\Firefox Nightly'
 
       - name: Install Firefox ESR
         shell: pwsh
         run: |
-          $url = "https://download.mozilla.org/?product=firefox-esr-latest-ssl&os=win64&lang=en-US"
-          $installer = "$env:TEMP\firefox-esr.exe"
-          Invoke-WebRequest -Uri $url -OutFile $installer -MaximumRetryCount 3
-          Start-Process -Wait -FilePath $installer -ArgumentList "/S /InstallDirectoryPath=C:\Program Files\Firefox ESR"
+          Invoke-WebRequest -Uri "https://download.mozilla.org/?product=firefox-esr-latest-ssl&os=win64&lang=en-US" -OutFile "$env:TEMP\firefox-esr.exe" -MaximumRetryCount 3
+          Start-Process -Wait -FilePath "$env:TEMP\firefox-esr.exe" -ArgumentList '/S', '/InstallDirectoryPath=C:\Program Files\Firefox ESR'
 
       - name: Install Brave (stable, nightly)
         run: |
