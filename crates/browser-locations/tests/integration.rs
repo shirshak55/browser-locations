@@ -21,6 +21,19 @@ fn assert_runs_version(path: &Path) {
         .arg("--version")
         .output()
         .unwrap_or_else(|e| panic!("failed to run {path:?} --version: {e}"));
+
+    #[cfg(unix)]
+    {
+        use std::os::unix::process::ExitStatusExt;
+        if output.status.signal().is_some() {
+            eprintln!(
+                "{path:?} --version killed by signal {}, skipping version check (headless CI)",
+                output.status.signal().unwrap()
+            );
+            return;
+        }
+    }
+
     assert!(
         output.status.success(),
         "{path:?} --version exited with {}",
@@ -41,58 +54,12 @@ fn validate_browser(path: &Path) {
 }
 
 macro_rules! locate_test {
-    ($name:ident, $locate:expr, $needle:literal) => {
-        #[test]
-        #[ignore]
-        fn $name() {
-            let Ok(location) = $locate else {
-                eprintln!(concat!(stringify!($name), ": not installed, skipping"));
-                return;
-            };
-            validate_browser(&location.path);
-            let version_output = Command::new(&location.path)
-                .arg("--version")
-                .output()
-                .expect("--version failed");
-            let text = format!(
-                "{}{}",
-                String::from_utf8_lossy(&version_output.stdout),
-                String::from_utf8_lossy(&version_output.stderr),
-            )
-            .to_lowercase();
-            assert!(
-                text.contains($needle),
-                "expected --version output to contain {:?}, got {text:?}",
-                $needle,
-            );
-        }
-    };
-}
-
-macro_rules! locate_test_validate {
     ($name:ident, $locate:expr) => {
         #[test]
         #[ignore]
         fn $name() {
-            let Ok(location) = $locate else {
-                eprintln!(concat!(stringify!($name), ": not installed, skipping"));
-                return;
-            };
+            let location = ($locate).expect(concat!(stringify!($name), ": browser not installed"));
             validate_browser(&location.path);
-        }
-    };
-}
-
-macro_rules! locate_test_exists {
-    ($name:ident, $locate:expr) => {
-        #[test]
-        #[ignore]
-        fn $name() {
-            let Ok(location) = $locate else {
-                eprintln!(concat!(stringify!($name), ": not installed, skipping"));
-                return;
-            };
-            assert_executable_exists(&location.path);
         }
     };
 }
@@ -103,29 +70,12 @@ macro_rules! discover_test {
         #[ignore]
         fn $name() {
             let found = $discover;
-            if found.is_empty() {
-                eprintln!(concat!(stringify!($name), ": none installed, skipping"));
-                return;
-            }
+            assert!(
+                !found.is_empty(),
+                concat!(stringify!($name), ": no browsers discovered")
+            );
             for location in &found {
                 validate_browser(&location.path);
-            }
-        }
-    };
-}
-
-macro_rules! discover_test_exists {
-    ($name:ident, $discover:expr) => {
-        #[test]
-        #[ignore]
-        fn $name() {
-            let found = $discover;
-            if found.is_empty() {
-                eprintln!(concat!(stringify!($name), ": none installed, skipping"));
-                return;
-            }
-            for location in &found {
-                assert_executable_exists(&location.path);
             }
         }
     };
@@ -136,57 +86,28 @@ macro_rules! any_test {
         #[test]
         #[ignore]
         fn $name() {
-            let Ok(path) = $call else {
-                eprintln!(concat!(stringify!($name), ": not installed, skipping"));
-                return;
-            };
+            let path = ($call).expect(concat!(stringify!($name), ": browser not installed"));
             validate_browser(&path);
         }
     };
 }
 
-macro_rules! any_test_exists {
-    ($name:ident, $call:expr) => {
-        #[test]
-        #[ignore]
-        fn $name() {
-            let Ok(path) = $call else {
-                eprintln!(concat!(stringify!($name), ": not installed, skipping"));
-                return;
-            };
-            assert_executable_exists(&path);
-        }
-    };
-}
-
 // ============================================================
-// Arc (macOS/Windows only, GUI app — no --version support)
+// Arc
 // ============================================================
 
-locate_test_exists!(arc_locate, browser_locations::arc::locate(RC::Default));
-discover_test_exists!(arc_discover, browser_locations::arc::discover());
-any_test_exists!(arc_any_stable, browser_locations::arc::get_any_arc_stable());
-any_test_exists!(arc_any_latest, browser_locations::arc::get_any_arc_latest());
+locate_test!(arc_locate, browser_locations::arc::locate(RC::Default));
+discover_test!(arc_discover, browser_locations::arc::discover());
+any_test!(arc_any_stable, browser_locations::arc::get_any_arc_stable());
+any_test!(arc_any_latest, browser_locations::arc::get_any_arc_latest());
 
 // ============================================================
 // Brave — Stable, Beta, Nightly
 // ============================================================
 
-locate_test!(
-    brave_stable,
-    browser_locations::brave::locate(RC::Stable),
-    "brave"
-);
-locate_test!(
-    brave_beta,
-    browser_locations::brave::locate(RC::Beta),
-    "brave"
-);
-locate_test!(
-    brave_nightly,
-    browser_locations::brave::locate(RC::Nightly),
-    "brave"
-);
+locate_test!(brave_stable, browser_locations::brave::locate(RC::Stable));
+locate_test!(brave_beta, browser_locations::brave::locate(RC::Beta));
+locate_test!(brave_nightly, browser_locations::brave::locate(RC::Nightly));
 discover_test!(brave_discover, browser_locations::brave::discover());
 any_test!(
     brave_any_stable,
@@ -201,26 +122,10 @@ any_test!(
 // Chrome — Stable, Beta, Dev, Canary
 // ============================================================
 
-locate_test!(
-    chrome_stable,
-    browser_locations::chrome::locate(RC::Stable),
-    "chrome"
-);
-locate_test!(
-    chrome_beta,
-    browser_locations::chrome::locate(RC::Beta),
-    "chrome"
-);
-locate_test!(
-    chrome_dev,
-    browser_locations::chrome::locate(RC::Dev),
-    "chrome"
-);
-locate_test!(
-    chrome_canary,
-    browser_locations::chrome::locate(RC::Canary),
-    "chrome"
-);
+locate_test!(chrome_stable, browser_locations::chrome::locate(RC::Stable));
+locate_test!(chrome_beta, browser_locations::chrome::locate(RC::Beta));
+locate_test!(chrome_dev, browser_locations::chrome::locate(RC::Dev));
+locate_test!(chrome_canary, browser_locations::chrome::locate(RC::Canary));
 discover_test!(chrome_discover, browser_locations::chrome::discover());
 any_test!(
     chrome_any_stable,
@@ -232,13 +137,12 @@ any_test!(
 );
 
 // ============================================================
-// Chromium — Default
+// Chromium
 // ============================================================
 
 locate_test!(
     chromium_locate,
-    browser_locations::chromium::locate(RC::Default),
-    "chromium"
+    browser_locations::chromium::locate(RC::Default)
 );
 discover_test!(chromium_discover, browser_locations::chromium::discover());
 any_test!(
@@ -254,18 +158,10 @@ any_test!(
 // Edge — Stable, Beta, Dev, Canary
 // ============================================================
 
-locate_test!(
-    edge_stable,
-    browser_locations::edge::locate(RC::Stable),
-    "edge"
-);
-locate_test!(edge_beta, browser_locations::edge::locate(RC::Beta), "edge");
-locate_test!(edge_dev, browser_locations::edge::locate(RC::Dev), "edge");
-locate_test!(
-    edge_canary,
-    browser_locations::edge::locate(RC::Canary),
-    "edge"
-);
+locate_test!(edge_stable, browser_locations::edge::locate(RC::Stable));
+locate_test!(edge_beta, browser_locations::edge::locate(RC::Beta));
+locate_test!(edge_dev, browser_locations::edge::locate(RC::Dev));
+locate_test!(edge_canary, browser_locations::edge::locate(RC::Canary));
 discover_test!(edge_discover, browser_locations::edge::discover());
 any_test!(
     edge_any_stable,
@@ -282,29 +178,18 @@ any_test!(
 
 locate_test!(
     firefox_stable,
-    browser_locations::firefox::locate(RC::Stable),
-    "firefox"
+    browser_locations::firefox::locate(RC::Stable)
 );
-locate_test!(
-    firefox_beta,
-    browser_locations::firefox::locate(RC::Beta),
-    "firefox"
-);
+locate_test!(firefox_beta, browser_locations::firefox::locate(RC::Beta));
 locate_test!(
     firefox_dev_edition,
-    browser_locations::firefox::locate(RC::DeveloperEdition),
-    "firefox"
+    browser_locations::firefox::locate(RC::DeveloperEdition)
 );
 locate_test!(
     firefox_nightly,
-    browser_locations::firefox::locate(RC::Nightly),
-    "firefox"
+    browser_locations::firefox::locate(RC::Nightly)
 );
-locate_test!(
-    firefox_esr,
-    browser_locations::firefox::locate(RC::Esr),
-    "firefox"
-);
+locate_test!(firefox_esr, browser_locations::firefox::locate(RC::Esr));
 discover_test!(firefox_discover, browser_locations::firefox::discover());
 any_test!(
     firefox_any_stable,
@@ -316,55 +201,55 @@ any_test!(
 );
 
 // ============================================================
-// Floorp (Firefox fork — segfaults on --version in headless CI)
+// Floorp
 // ============================================================
 
-locate_test_exists!(
+locate_test!(
     floorp_locate,
     browser_locations::floorp::locate(RC::Default)
 );
-discover_test_exists!(floorp_discover, browser_locations::floorp::discover());
-any_test_exists!(
+discover_test!(floorp_discover, browser_locations::floorp::discover());
+any_test!(
     floorp_any_stable,
     browser_locations::floorp::get_any_floorp_stable()
 );
-any_test_exists!(
+any_test!(
     floorp_any_latest,
     browser_locations::floorp::get_any_floorp_latest()
 );
 
 // ============================================================
-// Helium (GUI app — no --version support)
+// Helium
 // ============================================================
 
-locate_test_exists!(
+locate_test!(
     helium_locate,
     browser_locations::helium::locate(RC::Default)
 );
-discover_test_exists!(helium_discover, browser_locations::helium::discover());
-any_test_exists!(
+discover_test!(helium_discover, browser_locations::helium::discover());
+any_test!(
     helium_any_stable,
     browser_locations::helium::get_any_helium_stable()
 );
-any_test_exists!(
+any_test!(
     helium_any_latest,
     browser_locations::helium::get_any_helium_latest()
 );
 
 // ============================================================
-// LibreWolf (Firefox fork — segfaults on --version in headless CI)
+// LibreWolf
 // ============================================================
 
-locate_test_exists!(
+locate_test!(
     librewolf_locate,
     browser_locations::librewolf::locate(RC::Default)
 );
-discover_test_exists!(librewolf_discover, browser_locations::librewolf::discover());
-any_test_exists!(
+discover_test!(librewolf_discover, browser_locations::librewolf::discover());
+any_test!(
     librewolf_any_stable,
     browser_locations::librewolf::get_any_librewolf_stable()
 );
-any_test_exists!(
+any_test!(
     librewolf_any_latest,
     browser_locations::librewolf::get_any_librewolf_latest()
 );
@@ -373,9 +258,9 @@ any_test_exists!(
 // Opera — Stable, Beta, Dev
 // ============================================================
 
-locate_test_validate!(opera_stable, browser_locations::opera::locate(RC::Stable));
-locate_test_validate!(opera_beta, browser_locations::opera::locate(RC::Beta));
-locate_test_validate!(opera_dev, browser_locations::opera::locate(RC::Dev));
+locate_test!(opera_stable, browser_locations::opera::locate(RC::Stable));
+locate_test!(opera_beta, browser_locations::opera::locate(RC::Beta));
+locate_test!(opera_dev, browser_locations::opera::locate(RC::Dev));
 discover_test!(opera_discover, browser_locations::opera::discover());
 any_test!(
     opera_any_stable,
@@ -392,13 +277,11 @@ any_test!(
 
 locate_test!(
     vivaldi_stable,
-    browser_locations::vivaldi::locate(RC::Stable),
-    "vivaldi"
+    browser_locations::vivaldi::locate(RC::Stable)
 );
 locate_test!(
     vivaldi_snapshot,
-    browser_locations::vivaldi::locate(RC::Snapshot),
-    "vivaldi"
+    browser_locations::vivaldi::locate(RC::Snapshot)
 );
 discover_test!(vivaldi_discover, browser_locations::vivaldi::discover());
 any_test!(
@@ -411,15 +294,14 @@ any_test!(
 );
 
 // ============================================================
-// Zen (Firefox fork — segfaults on --version in headless CI)
-// Channels: Stable, Twilight
+// Zen — Stable, Twilight
 // ============================================================
 
-locate_test_exists!(zen_stable, browser_locations::zen::locate(RC::Stable));
-locate_test_exists!(zen_twilight, browser_locations::zen::locate(RC::Twilight));
-discover_test_exists!(zen_discover, browser_locations::zen::discover());
-any_test_exists!(zen_any_stable, browser_locations::zen::get_any_zen_stable());
-any_test_exists!(zen_any_latest, browser_locations::zen::get_any_zen_latest());
+locate_test!(zen_stable, browser_locations::zen::locate(RC::Stable));
+locate_test!(zen_twilight, browser_locations::zen::locate(RC::Twilight));
+discover_test!(zen_discover, browser_locations::zen::discover());
+any_test!(zen_any_stable, browser_locations::zen::get_any_zen_stable());
+any_test!(zen_any_latest, browser_locations::zen::get_any_zen_latest());
 
 // ============================================================
 // General

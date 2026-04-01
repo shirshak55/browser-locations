@@ -52,7 +52,6 @@ jobs:
           sudo mkdir -p /opt/firefox-beta
           sudo tar -xjf /tmp/firefox-beta.tar.bz2 --strip-components=1 -C /opt/firefox-beta
           sudo ln -sf /opt/firefox-beta/firefox /usr/bin/firefox-beta
-        continue-on-error: true
 
       - name: Install Firefox Developer Edition
         run: |
@@ -60,7 +59,6 @@ jobs:
           sudo mkdir -p /opt/firefox-developer-edition
           sudo tar -xjf /tmp/firefox-devedition.tar.bz2 --strip-components=1 -C /opt/firefox-developer-edition
           sudo ln -sf /opt/firefox-developer-edition/firefox /usr/bin/firefox-developer-edition
-        continue-on-error: true
 
       - name: Install Firefox Nightly
         run: |
@@ -68,7 +66,6 @@ jobs:
           sudo mkdir -p /opt/firefox-nightly
           sudo tar -xjf /tmp/firefox-nightly.tar.bz2 --strip-components=1 -C /opt/firefox-nightly
           sudo ln -sf /opt/firefox-nightly/firefox /usr/bin/firefox-nightly
-        continue-on-error: true
 
       - name: Install Brave (stable, beta, nightly)
         run: |
@@ -105,22 +102,17 @@ jobs:
           sudo extrepo enable librewolf
           sudo apt-get update
           sudo apt-get install -y librewolf
-        continue-on-error: true
 
       - name: Install Floorp
         run: |
-          curl -fsSL https://ppa.ablaze.one/KEY.gpg | sudo gpg --dearmor -o /usr/share/keyrings/ppa-ablaze-one.gpg
-          echo "deb [signed-by=/usr/share/keyrings/ppa-ablaze-one.gpg] https://ppa.ablaze.one/ noble main" | sudo tee /etc/apt/sources.list.d/ppa-ablaze-one.list
+          curl -fsSL https://ppa.floorp.app/KEY.gpg | sudo gpg --dearmor -o /usr/share/keyrings/Floorp.gpg
+          sudo curl -sS --compressed -o /etc/apt/sources.list.d/Floorp.list "https://ppa.floorp.app/Floorp.list"
           sudo apt-get update
           sudo apt-get install -y floorp
-        continue-on-error: true
 
       - name: Install Zen Browser
         run: |
-          LATEST=$(curl -fsSL https://api.github.com/repos/nicoth-in/zen-browser-alpha/releases/latest | grep -oP '"tag_name":\s*"\K[^"]+')
-          wget -q -O /tmp/zen.deb "https://github.com/nicoth-in/zen-browser-alpha/releases/download/${LATEST}/zen-browser_${LATEST#v}_amd64.deb"
-          sudo dpkg -i /tmp/zen.deb || sudo apt-get install -f -y
-        continue-on-error: true
+          curl -fsSL https://github.com/zen-browser/updates-server/raw/refs/heads/main/install.sh | bash
 
       - name: List installed browsers
         run: |
@@ -169,23 +161,18 @@ jobs:
 
       - name: Install Chromium
         run: brew install --cask chromium
-        continue-on-error: true
 
       - name: Install Arc
         run: brew install --cask arc
-        continue-on-error: true
 
       - name: Install LibreWolf
         run: brew install --cask librewolf
-        continue-on-error: true
 
       - name: Install Floorp
         run: brew install --cask floorp
-        continue-on-error: true
 
       - name: Install Zen Browser
         run: brew install --cask zen-browser
-        continue-on-error: true
 
       - name: List installed browsers
         run: |
@@ -227,11 +214,9 @@ jobs:
 
       - name: Install Chromium
         run: choco install chromium -y --no-progress --ignore-checksums
-        continue-on-error: true
 
       - name: Install LibreWolf
         run: choco install librewolf -y --no-progress --ignore-checksums
-        continue-on-error: true
 
       - name: Run integration tests
         run: cargo test -p browser-locations --all-features -- --ignored
