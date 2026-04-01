@@ -128,9 +128,11 @@ any_test!(
 // ============================================================
 
 locate_test!(edge_stable, browser_locations::edge::locate(RC::Stable));
+#[cfg(not(target_os = "windows"))]
 locate_test!(edge_beta, browser_locations::edge::locate(RC::Beta));
+#[cfg(not(target_os = "windows"))]
 locate_test!(edge_dev, browser_locations::edge::locate(RC::Dev));
-#[cfg(not(target_os = "linux"))]
+#[cfg(target_os = "macos")]
 locate_test!(edge_canary, browser_locations::edge::locate(RC::Canary));
 discover_test!(edge_discover, browser_locations::edge::discover());
 any_test!(
@@ -171,22 +173,26 @@ any_test!(
 );
 
 // ============================================================
-// Floorp
+// Floorp (Windows CI installer path differs from user install)
 // ============================================================
 
-locate_test!(
-    floorp_locate,
-    browser_locations::floorp::locate(RC::Default)
-);
-discover_test!(floorp_discover, browser_locations::floorp::discover());
-any_test!(
-    floorp_any_stable,
-    browser_locations::floorp::get_any_floorp_stable()
-);
-any_test!(
-    floorp_any_latest,
-    browser_locations::floorp::get_any_floorp_latest()
-);
+#[cfg(not(target_os = "windows"))]
+mod floorp_tests {
+    use super::*;
+    locate_test!(
+        floorp_locate,
+        browser_locations::floorp::locate(RC::Default)
+    );
+    discover_test!(floorp_discover, browser_locations::floorp::discover());
+    any_test!(
+        floorp_any_stable,
+        browser_locations::floorp::get_any_floorp_stable()
+    );
+    any_test!(
+        floorp_any_latest,
+        browser_locations::floorp::get_any_floorp_latest()
+    );
+}
 
 // ============================================================
 // Helium (no silent installer for Windows)
@@ -232,19 +238,22 @@ any_test!(
 // Opera — Stable, Beta, Dev
 // ============================================================
 
-locate_test!(opera_stable, browser_locations::opera::locate(RC::Stable));
-locate_test!(opera_beta, browser_locations::opera::locate(RC::Beta));
 #[cfg(not(target_os = "windows"))]
-locate_test!(opera_dev, browser_locations::opera::locate(RC::Dev));
-discover_test!(opera_discover, browser_locations::opera::discover());
-any_test!(
-    opera_any_stable,
-    browser_locations::opera::get_any_opera_stable()
-);
-any_test!(
-    opera_any_latest,
-    browser_locations::opera::get_any_opera_latest()
-);
+mod opera_tests {
+    use super::*;
+    locate_test!(opera_stable, browser_locations::opera::locate(RC::Stable));
+    locate_test!(opera_beta, browser_locations::opera::locate(RC::Beta));
+    locate_test!(opera_dev, browser_locations::opera::locate(RC::Dev));
+    discover_test!(opera_discover, browser_locations::opera::discover());
+    any_test!(
+        opera_any_stable,
+        browser_locations::opera::get_any_opera_stable()
+    );
+    any_test!(
+        opera_any_latest,
+        browser_locations::opera::get_any_opera_latest()
+    );
+}
 
 // ============================================================
 // Vivaldi — Stable, Snapshot

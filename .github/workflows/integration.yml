@@ -110,6 +110,8 @@ jobs:
         run: |
           mkdir -p "$HOME/.local/bin" "$HOME/.local/share/applications"
           curl -fsSL https://github.com/zen-browser/updates-server/raw/refs/heads/main/install.sh | bash
+          sudo ln -sf "$HOME/.tarball-installations/zen/zen-browser" /usr/bin/zen-browser || \
+            sudo ln -sf "$HOME/.tarball-installations/zen/zen" /usr/bin/zen-browser
 
       - name: Install Zen Browser Twilight
         run: |
