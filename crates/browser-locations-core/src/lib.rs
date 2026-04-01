@@ -1198,7 +1198,7 @@ const OPERA_STABLE_LINUX: [Candidate; 2] = [
 ];
 const OPERA_BETA_MACOS: [Candidate; 1] = [candidate(
     CandidateKind::KnownLocation,
-    "/Applications/Opera beta.app/Contents/MacOS/Opera beta",
+    "/Applications/Opera Beta.app/Contents/MacOS/Opera Beta",
 )];
 const OPERA_BETA_WINDOWS: [Candidate; 1] = [candidate(
     CandidateKind::KnownLocation,

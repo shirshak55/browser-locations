@@ -70,6 +70,8 @@ jobs:
           curl -fsSLo /tmp/brave-keyring.gpg https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg
           sudo install -o root -g root -m 644 /tmp/brave-keyring.gpg /usr/share/keyrings/brave-browser-archive-keyring.gpg
           echo "deb [arch=amd64 signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main" | sudo tee /etc/apt/sources.list.d/brave-browser-release.list
+          echo "deb [arch=amd64 signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-beta.s3.brave.com/ stable main" | sudo tee /etc/apt/sources.list.d/brave-browser-beta.list
+          echo "deb [arch=amd64 signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-nightly.s3.brave.com/ stable main" | sudo tee /etc/apt/sources.list.d/brave-browser-nightly.list
           sudo apt-get update
           sudo apt-get install -y brave-browser brave-browser-beta brave-browser-nightly
 
@@ -103,8 +105,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y floorp
 
-      - name: Install Zen Browser
-        run: curl -fsSL https://github.com/zen-browser/updates-server/raw/refs/heads/main/install.sh | bash
+      - name: Install Zen Browser (stable, twilight)
+        run: |
+          curl -fsSL https://github.com/zen-browser/updates-server/raw/refs/heads/main/install.sh | bash
+          curl -fsSL https://github.com/zen-browser/updates-server/raw/refs/heads/main/install-twilight.sh | bash
 
       - name: Install Helium
         run: |
@@ -203,8 +207,10 @@ jobs:
       - name: Install Floorp
         run: brew install --cask floorp
 
-      - name: Install Zen Browser
-        run: brew install --cask zen-browser
+      - name: Install Zen Browser (stable, twilight)
+        run: |
+          brew install --cask zen-browser
+          brew install --cask zen-browser@twilight
 
       - name: Install Helium
         run: brew install --cask helium-browser
@@ -273,7 +279,7 @@ jobs:
       - name: Install Brave (stable, nightly)
         run: |
           choco install brave -y --no-progress --ignore-checksums
-          choco install brave-nightly -y --no-progress --ignore-checksums
+          choco install brave-nightly -y --no-progress --ignore-checksums --pre
 
       - name: Install Edge Beta
         shell: pwsh
