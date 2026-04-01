@@ -67,11 +67,12 @@ jobs:
 
       - name: Install Brave (stable, beta, nightly)
         run: |
-          curl -fsSLo /tmp/brave-keyring.gpg https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg
-          sudo install -o root -g root -m 644 /tmp/brave-keyring.gpg /usr/share/keyrings/brave-browser-archive-keyring.gpg
+          sudo curl -fsSLo /usr/share/keyrings/brave-browser-archive-keyring.gpg https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg
+          sudo curl -fsSLo /usr/share/keyrings/brave-browser-beta-archive-keyring.gpg https://brave-browser-apt-beta.s3.brave.com/brave-browser-beta-archive-keyring.gpg
+          sudo curl -fsSLo /usr/share/keyrings/brave-browser-nightly-archive-keyring.gpg https://brave-browser-apt-nightly.s3.brave.com/brave-browser-nightly-archive-keyring.gpg
           echo "deb [arch=amd64 signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main" | sudo tee /etc/apt/sources.list.d/brave-browser-release.list
-          echo "deb [arch=amd64 signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-beta.s3.brave.com/ stable main" | sudo tee /etc/apt/sources.list.d/brave-browser-beta.list
-          echo "deb [arch=amd64 signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-nightly.s3.brave.com/ stable main" | sudo tee /etc/apt/sources.list.d/brave-browser-nightly.list
+          echo "deb [arch=amd64 signed-by=/usr/share/keyrings/brave-browser-beta-archive-keyring.gpg] https://brave-browser-apt-beta.s3.brave.com/ stable main" | sudo tee /etc/apt/sources.list.d/brave-browser-beta.list
+          echo "deb [arch=amd64 signed-by=/usr/share/keyrings/brave-browser-nightly-archive-keyring.gpg] https://brave-browser-apt-nightly.s3.brave.com/ stable main" | sudo tee /etc/apt/sources.list.d/brave-browser-nightly.list
           sudo apt-get update
           sudo apt-get install -y brave-browser brave-browser-beta brave-browser-nightly
 
@@ -144,28 +145,41 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
 
-      - name: Install Chrome (stable, beta, dev, canary)
-        run: |
-          brew install --cask google-chrome
-          brew install --cask google-chrome@beta
-          brew install --cask google-chrome@dev
-          brew install --cask google-chrome@canary
+      - name: Install Chrome
+        run: brew install --cask google-chrome
+
+      - name: Install Chrome Beta
+        run: brew install --cask google-chrome@beta
+
+      - name: Install Chrome Dev
+        run: brew install --cask google-chrome@dev
+
+      - name: Install Chrome Canary
+        run: brew install --cask google-chrome@canary
 
       - name: Install Chromium
         run: brew install --cask chromium
 
-      - name: Install Edge (stable, beta, dev, canary)
-        run: |
-          brew install --cask microsoft-edge
-          brew install --cask microsoft-edge@beta
-          brew install --cask microsoft-edge@dev
-          brew install --cask microsoft-edge@canary
+      - name: Install Edge
+        run: brew install --cask microsoft-edge
 
-      - name: Install Firefox (stable, developer-edition, nightly)
-        run: |
-          brew install --cask firefox
-          brew install --cask firefox@developer-edition
-          brew install --cask firefox@nightly
+      - name: Install Edge Beta
+        run: brew install --cask microsoft-edge@beta
+
+      - name: Install Edge Dev
+        run: brew install --cask microsoft-edge@dev
+
+      - name: Install Edge Canary
+        run: brew install --cask microsoft-edge@canary
+
+      - name: Install Firefox
+        run: brew install --cask firefox
+
+      - name: Install Firefox Developer Edition
+        run: brew install --cask firefox@developer-edition
+
+      - name: Install Firefox Nightly
+        run: brew install --cask firefox@nightly
 
       - name: Install Firefox Beta (direct DMG — brew cask conflicts with stable)
         run: |
@@ -181,22 +195,29 @@ jobs:
           cp -R "/Volumes/Firefox/Firefox.app" "/Applications/Firefox ESR.app"
           hdiutil detach "/Volumes/Firefox"
 
-      - name: Install Brave (stable, beta, nightly)
-        run: |
-          brew install --cask brave-browser
-          brew install --cask brave-browser@beta
-          brew install --cask brave-browser@nightly
+      - name: Install Brave
+        run: brew install --cask brave-browser
 
-      - name: Install Opera (stable, beta, developer)
-        run: |
-          brew install --cask opera
-          brew install --cask opera@beta
-          brew install --cask opera@developer
+      - name: Install Brave Beta
+        run: brew install --cask brave-browser@beta
 
-      - name: Install Vivaldi (stable, snapshot)
-        run: |
-          brew install --cask vivaldi
-          brew install --cask vivaldi@snapshot
+      - name: Install Brave Nightly
+        run: brew install --cask brave-browser@nightly
+
+      - name: Install Opera
+        run: brew install --cask opera
+
+      - name: Install Opera Beta
+        run: brew install --cask opera@beta
+
+      - name: Install Opera Developer
+        run: brew install --cask opera@developer
+
+      - name: Install Vivaldi
+        run: brew install --cask vivaldi
+
+      - name: Install Vivaldi Snapshot
+        run: brew install --cask vivaldi@snapshot
 
       - name: Install Arc
         run: brew install --cask arc
@@ -207,10 +228,11 @@ jobs:
       - name: Install Floorp
         run: brew install --cask floorp
 
-      - name: Install Zen Browser (stable, twilight)
-        run: |
-          brew install --cask zen-browser
-          brew install --cask zen-browser@twilight
+      - name: Install Zen Browser
+        run: brew install --cask zen-browser
+
+      - name: Install Zen Browser Twilight
+        run: brew install --cask zen-browser@twilight
 
       - name: Install Helium
         run: brew install --cask helium-browser
@@ -305,10 +327,11 @@ jobs:
           Invoke-WebRequest -Uri $url -OutFile $installer -MaximumRetryCount 3
           Start-Process -Wait msiexec -ArgumentList "/i `"$installer`" /quiet /norestart"
 
-      - name: Install Opera (stable, beta)
-        run: |
-          choco install opera -y --no-progress --ignore-checksums
-          choco install opera-beta -y --no-progress --ignore-checksums
+      - name: Install Opera
+        run: choco install opera -y --no-progress --ignore-checksums
+
+      - name: Install Opera Beta
+        run: choco install opera-beta -y --no-progress --ignore-checksums --pre
 
       - name: Install Vivaldi
         run: choco install vivaldi -y --no-progress --ignore-checksums
