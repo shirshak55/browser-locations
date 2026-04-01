@@ -15,8 +15,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - name: Install cargo tools
-        run: cargo install cargo-audit cargo-deny cargo-machete --locked
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-audit,cargo-deny,cargo-machete
       - name: Cargo audit
         run: cargo audit
       - name: Cargo deny
@@ -30,7 +31,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@nightly
       - uses: Swatinem/rust-cache@v2
-      - name: Install cargo-udeps
-        run: cargo install cargo-udeps --locked
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-udeps
       - name: Cargo udeps
         run: cargo +nightly udeps --workspace --all-targets
