@@ -1,4 +1,4 @@
-#![allow(missing_docs)]
+//! Prints the discovered Chrome executable path.
 
 fn main() {
     match chrome_locations::get_any_chrome_stable() {

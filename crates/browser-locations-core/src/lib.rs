@@ -367,6 +367,25 @@ const fn browser(
 }
 
 /// Locates a browser executable for a specific browser and release channel.
+///
+/// Checks environment variable overrides first, then probes well-known
+/// installation paths, and finally falls back to `PATH` lookup.
+///
+/// # Examples
+///
+/// ```no_run
+/// use browser_locations_core::{Browser, ReleaseChannel, locate_browser};
+///
+/// let location = locate_browser(Browser::Chrome, ReleaseChannel::Stable)?;
+/// println!("Chrome found at: {}", location.path.display());
+/// # Ok::<(), browser_locations_core::LocateError>(())
+/// ```
+///
+/// # Errors
+///
+/// - [`LocateError::UnsupportedChannel`] if the channel is not modeled for the browser.
+/// - [`LocateError::UnsupportedPlatform`] if no candidates exist on this platform.
+/// - [`LocateError::NotFound`] if no executable was found at any candidate path.
 pub fn locate_browser(
     browser: Browser,
     channel: ReleaseChannel,
@@ -375,6 +394,20 @@ pub fn locate_browser(
 }
 
 /// Locates a browser executable using the browser's stable-first fallback order.
+///
+/// # Examples
+///
+/// ```no_run
+/// use browser_locations_core::{Browser, locate_any_stable};
+///
+/// let location = locate_any_stable(Browser::Firefox)?;
+/// println!("Firefox found at: {}", location.path.display());
+/// # Ok::<(), browser_locations_core::LocateError>(())
+/// ```
+///
+/// # Errors
+///
+/// Returns [`LocateError::NoInstalledVariant`] if no channel produced a match.
 pub fn locate_any_stable(browser: Browser) -> Result<BrowserLocation, LocateError> {
     locate_with_fallback(
         browser,
@@ -385,6 +418,20 @@ pub fn locate_any_stable(browser: Browser) -> Result<BrowserLocation, LocateErro
 }
 
 /// Locates a browser executable using the browser's latest-first fallback order.
+///
+/// # Examples
+///
+/// ```no_run
+/// use browser_locations_core::{Browser, locate_any_latest};
+///
+/// let location = locate_any_latest(Browser::Chrome)?;
+/// println!("Chrome found at: {}", location.path.display());
+/// # Ok::<(), browser_locations_core::LocateError>(())
+/// ```
+///
+/// # Errors
+///
+/// Returns [`LocateError::NoInstalledVariant`] if no channel produced a match.
 pub fn locate_any_latest(browser: Browser) -> Result<BrowserLocation, LocateError> {
     locate_with_fallback(
         browser,
@@ -395,12 +442,32 @@ pub fn locate_any_latest(browser: Browser) -> Result<BrowserLocation, LocateErro
 }
 
 /// Discovers every installed executable modeled for a specific browser.
+///
+/// # Examples
+///
+/// ```no_run
+/// use browser_locations_core::{Browser, discover_browser};
+///
+/// for location in &discover_browser(Browser::Chrome) {
+///     println!("{} at {}", location.channel, location.path.display());
+/// }
+/// ```
 #[must_use]
 pub fn discover_browser(browser: Browser) -> Vec<BrowserLocation> {
     discover_browser_in_environment(browser, &SystemEnvironment)
 }
 
 /// Discovers every installed executable for every modeled browser.
+///
+/// # Examples
+///
+/// ```no_run
+/// use browser_locations_core::discover_installed;
+///
+/// for location in &discover_installed() {
+///     println!("{} {} at {}", location.browser, location.channel, location.path.display());
+/// }
+/// ```
 #[must_use]
 pub fn discover_installed() -> Vec<BrowserLocation> {
     let environment = SystemEnvironment;
@@ -415,6 +482,10 @@ pub fn discover_installed() -> Vec<BrowserLocation> {
 macro_rules! define_getter {
     ($name:ident, $channel:expr, $doc:literal) => {
         #[doc = $doc]
+        ///
+        /// # Errors
+        ///
+        /// Returns [`LocateError`] if the browser is not found for this channel.
         pub fn $name() -> ::std::result::Result<::std::path::PathBuf, $crate::LocateError> {
             locate($channel).map(|location| location.path)
         }

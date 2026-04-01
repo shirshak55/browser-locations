@@ -8,6 +8,10 @@ use browser_locations_core::{
 pub use browser_locations_core::{BrowserLocation, LocateError, ReleaseChannel};
 
 /// Locates a Helium executable for a specific channel.
+///
+/// # Errors
+///
+/// Returns [`LocateError`] if the channel is unsupported or no executable is found.
 pub fn locate(channel: ReleaseChannel) -> Result<BrowserLocation, LocateError> {
     locate_browser(Browser::Helium, channel)
 }
@@ -24,11 +28,19 @@ pub fn get_helium_path() -> Result<PathBuf, LocateError> {
 }
 
 /// Returns the best available Helium executable using the stable helper.
+///
+/// # Errors
+///
+/// Returns [`LocateError`] if no installed executable is found.
 pub fn get_any_helium_stable() -> Result<PathBuf, LocateError> {
     locate_any_stable(Browser::Helium).map(|location| location.path)
 }
 
 /// Returns the best available Helium executable, preferring the newest channel first.
+///
+/// # Errors
+///
+/// Returns [`LocateError`] if no installed executable is found.
 pub fn get_any_helium_latest() -> Result<PathBuf, LocateError> {
     locate_any_latest(Browser::Helium).map(|location| location.path)
 }

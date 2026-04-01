@@ -8,6 +8,10 @@ use browser_locations_core::{
 pub use browser_locations_core::{BrowserLocation, LocateError, ReleaseChannel, define_getter};
 
 /// Locates a Brave executable for a specific channel.
+///
+/// # Errors
+///
+/// Returns [`LocateError`] if the channel is unsupported or no executable is found.
 pub fn locate(channel: ReleaseChannel) -> Result<BrowserLocation, LocateError> {
     locate_browser(Browser::Brave, channel)
 }
@@ -35,11 +39,19 @@ define_getter!(
 );
 
 /// Returns the best available Brave executable, preferring stable first.
+///
+/// # Errors
+///
+/// Returns [`LocateError`] if no installed executable is found.
 pub fn get_any_brave_stable() -> Result<PathBuf, LocateError> {
     locate_any_stable(Browser::Brave).map(|location| location.path)
 }
 
 /// Returns the best available Brave executable, preferring the newest channel first.
+///
+/// # Errors
+///
+/// Returns [`LocateError`] if no installed executable is found.
 pub fn get_any_brave_latest() -> Result<PathBuf, LocateError> {
     locate_any_latest(Browser::Brave).map(|location| location.path)
 }

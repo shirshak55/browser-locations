@@ -8,6 +8,10 @@ use browser_locations_core::{
 pub use browser_locations_core::{BrowserLocation, LocateError, ReleaseChannel, define_getter};
 
 /// Locates a Firefox executable for a specific channel.
+///
+/// # Errors
+///
+/// Returns [`LocateError`] if the channel is unsupported or no executable is found.
 pub fn locate(channel: ReleaseChannel) -> Result<BrowserLocation, LocateError> {
     locate_browser(Browser::Firefox, channel)
 }
@@ -45,11 +49,19 @@ define_getter!(
 );
 
 /// Returns the best available Firefox executable, preferring stable first.
+///
+/// # Errors
+///
+/// Returns [`LocateError`] if no installed executable is found.
 pub fn get_any_firefox_stable() -> Result<PathBuf, LocateError> {
     locate_any_stable(Browser::Firefox).map(|location| location.path)
 }
 
 /// Returns the best available Firefox executable, preferring the newest channel first.
+///
+/// # Errors
+///
+/// Returns [`LocateError`] if no installed executable is found.
 pub fn get_any_firefox_latest() -> Result<PathBuf, LocateError> {
     locate_any_latest(Browser::Firefox).map(|location| location.path)
 }

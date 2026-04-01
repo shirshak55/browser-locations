@@ -1,4 +1,4 @@
-#![allow(missing_docs)]
+#![expect(missing_docs)]
 
 use std::path::Path;
 use std::process::Command;

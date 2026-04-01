@@ -1,4 +1,4 @@
-#![allow(missing_docs)]
+#![expect(missing_docs)]
 
 #[macro_use]
 #[path = "../../../test-support/browser_suite.rs"]

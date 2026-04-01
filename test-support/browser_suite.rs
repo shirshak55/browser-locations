@@ -1,4 +1,4 @@
-#![allow(dead_code, missing_docs)]
+#![allow(dead_code)]
 
 use std::env;
 use std::fs;
@@ -20,7 +20,7 @@ fn unique_path(name: &str) -> PathBuf {
     env::temp_dir().join(format!("browser-locations-{name}-{stamp}"))
 }
 
-pub fn make_fake_browser(browser: &str, channel: &str) -> PathBuf {
+pub(crate) fn make_fake_browser(browser: &str, channel: &str) -> PathBuf {
     let base = unique_path(&format!("{browser}-{channel}"));
     fs::create_dir_all(&base).expect("failed to create fake browser directory");
     let path = if cfg!(windows) {
@@ -47,7 +47,7 @@ pub fn make_fake_browser(browser: &str, channel: &str) -> PathBuf {
     path
 }
 
-pub fn assert_reports_version(path: &Path, expected: &str) {
+pub(crate) fn assert_reports_version(path: &Path, expected: &str) {
     let output = if cfg!(windows) {
         Command::new("cmd")
             .arg("/C")
@@ -68,7 +68,7 @@ pub fn assert_reports_version(path: &Path, expected: &str) {
     );
 }
 
-pub fn with_env_vars<T>(entries: &[(&str, &Path)], action: impl FnOnce() -> T) -> T {
+pub(crate) fn with_env_vars<T>(entries: &[(&str, &Path)], action: impl FnOnce() -> T) -> T {
     let _guard = env_lock()
         .lock()
         .unwrap_or_else(|poisoned| poisoned.into_inner());

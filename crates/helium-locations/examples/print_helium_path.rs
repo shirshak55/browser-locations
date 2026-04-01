@@ -1,4 +1,4 @@
-#![allow(missing_docs)]
+//! Prints the discovered Helium executable path.
 
 fn main() {
     match helium_locations::get_any_helium_stable() {
