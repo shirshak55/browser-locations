@@ -107,7 +107,9 @@ jobs:
           sudo apt-get install -y floorp
 
       - name: Install Zen Browser
-        run: curl -fsSL https://github.com/zen-browser/updates-server/raw/refs/heads/main/install.sh | bash
+        run: |
+          mkdir -p "$HOME/.local/bin"
+          curl -fsSL https://github.com/zen-browser/updates-server/raw/refs/heads/main/install.sh | bash
 
       - name: Install Zen Browser Twilight
         run: |
@@ -311,23 +313,8 @@ jobs:
       - name: Install Chrome Beta
         shell: pwsh
         run: |
-          Invoke-WebRequest -Uri "https://dl.google.com/tag/s/appguid%3D%7B8237E44A-0054-442C-B6B6-EA0509993955%7D%26ap%3D-arch_x64-statsdef_1%261.1%26installerdata%3D%257B%2522homepage%2522%253A%2522https%253A%252F%252Fwww.google.com%252Fchrome%252Fbeta%252F%2522%257D/update2/installers/ChromeBetaSetup.exe" -OutFile "$env:TEMP\ChromeBetaSetup.exe" -MaximumRetryCount 3
-          Start-Process -Wait -FilePath "$env:TEMP\ChromeBetaSetup.exe" -ArgumentList '/silent', '/install'
-          Start-Sleep -Seconds 15
-
-      - name: Install Chrome Dev
-        shell: pwsh
-        run: |
-          Invoke-WebRequest -Uri "https://dl.google.com/tag/s/appguid%3D%7B401C381F-E0DE-4B85-8BD8-3F3F14FBDA57%7D%26ap%3D-arch_x64-statsdef_1%262.0%26installerdata%3D%257B%2522homepage%2522%253A%2522https%253A%252F%252Fwww.google.com%252Fchrome%252Fdev%252F%2522%257D/update2/installers/ChromeDevSetup.exe" -OutFile "$env:TEMP\ChromeDevSetup.exe" -MaximumRetryCount 3
-          Start-Process -Wait -FilePath "$env:TEMP\ChromeDevSetup.exe" -ArgumentList '/silent', '/install'
-          Start-Sleep -Seconds 15
-
-      - name: Install Chrome Canary
-        shell: pwsh
-        run: |
-          Invoke-WebRequest -Uri "https://dl.google.com/tag/s/appguid%3D%7B4EA16AC7-FD5A-47C3-875B-DBF4A2008C20%7D%26ap%3D-arch_x64-statsdef_1%261.1%26installerdata%3D%257B%2522homepage%2522%253A%2522https%253A%252F%252Fwww.google.com%252Fchrome%252Fcanary%252F%2522%257D/update2/installers/ChromeCanarySetup.exe" -OutFile "$env:TEMP\ChromeCanarySetup.exe" -MaximumRetryCount 3
-          Start-Process -Wait -FilePath "$env:TEMP\ChromeCanarySetup.exe" -ArgumentList '/silent', '/install'
-          Start-Sleep -Seconds 15
+          Invoke-WebRequest -Uri "https://dl.google.com/dl/chrome/install/beta/googlechromebetastandaloneenterprise64.msi" -OutFile "$env:TEMP\ChromeBeta.msi" -MaximumRetryCount 3
+          Start-Process -Wait msiexec -ArgumentList "/i `"$env:TEMP\ChromeBeta.msi`" /quiet /norestart"
 
       - name: Install Edge Beta
         shell: pwsh

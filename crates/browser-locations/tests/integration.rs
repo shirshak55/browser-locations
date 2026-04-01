@@ -58,7 +58,7 @@ macro_rules! any_test {
 // Arc (macOS + Windows only)
 // ============================================================
 
-#[cfg(not(target_os = "linux"))]
+#[cfg(target_os = "macos")]
 mod arc_tests {
     use super::*;
     locate_test!(arc_locate, browser_locations::arc::locate(RC::Default));
@@ -72,6 +72,7 @@ mod arc_tests {
 // ============================================================
 
 locate_test!(brave_stable, browser_locations::brave::locate(RC::Stable));
+#[cfg(not(target_os = "windows"))]
 locate_test!(brave_beta, browser_locations::brave::locate(RC::Beta));
 locate_test!(brave_nightly, browser_locations::brave::locate(RC::Nightly));
 discover_test!(brave_discover, browser_locations::brave::discover());
@@ -90,8 +91,9 @@ any_test!(
 
 locate_test!(chrome_stable, browser_locations::chrome::locate(RC::Stable));
 locate_test!(chrome_beta, browser_locations::chrome::locate(RC::Beta));
+#[cfg(not(target_os = "windows"))]
 locate_test!(chrome_dev, browser_locations::chrome::locate(RC::Dev));
-#[cfg(not(target_os = "linux"))]
+#[cfg(not(any(target_os = "linux", target_os = "windows")))]
 locate_test!(chrome_canary, browser_locations::chrome::locate(RC::Canary));
 discover_test!(chrome_discover, browser_locations::chrome::discover());
 any_test!(
@@ -187,22 +189,26 @@ any_test!(
 );
 
 // ============================================================
-// Helium
+// Helium (no silent installer for Windows)
 // ============================================================
 
-locate_test!(
-    helium_locate,
-    browser_locations::helium::locate(RC::Default)
-);
-discover_test!(helium_discover, browser_locations::helium::discover());
-any_test!(
-    helium_any_stable,
-    browser_locations::helium::get_any_helium_stable()
-);
-any_test!(
-    helium_any_latest,
-    browser_locations::helium::get_any_helium_latest()
-);
+#[cfg(not(target_os = "windows"))]
+mod helium_tests {
+    use super::*;
+    locate_test!(
+        helium_locate,
+        browser_locations::helium::locate(RC::Default)
+    );
+    discover_test!(helium_discover, browser_locations::helium::discover());
+    any_test!(
+        helium_any_stable,
+        browser_locations::helium::get_any_helium_stable()
+    );
+    any_test!(
+        helium_any_latest,
+        browser_locations::helium::get_any_helium_latest()
+    );
+}
 
 // ============================================================
 // LibreWolf
@@ -228,6 +234,7 @@ any_test!(
 
 locate_test!(opera_stable, browser_locations::opera::locate(RC::Stable));
 locate_test!(opera_beta, browser_locations::opera::locate(RC::Beta));
+#[cfg(not(target_os = "windows"))]
 locate_test!(opera_dev, browser_locations::opera::locate(RC::Dev));
 discover_test!(opera_discover, browser_locations::opera::discover());
 any_test!(
@@ -247,6 +254,7 @@ locate_test!(
     vivaldi_stable,
     browser_locations::vivaldi::locate(RC::Stable)
 );
+#[cfg(not(target_os = "windows"))]
 locate_test!(
     vivaldi_snapshot,
     browser_locations::vivaldi::locate(RC::Snapshot)
@@ -265,11 +273,15 @@ any_test!(
 // Zen — Stable, Twilight
 // ============================================================
 
-locate_test!(zen_stable, browser_locations::zen::locate(RC::Stable));
-locate_test!(zen_twilight, browser_locations::zen::locate(RC::Twilight));
-discover_test!(zen_discover, browser_locations::zen::discover());
-any_test!(zen_any_stable, browser_locations::zen::get_any_zen_stable());
-any_test!(zen_any_latest, browser_locations::zen::get_any_zen_latest());
+#[cfg(not(target_os = "windows"))]
+mod zen_tests {
+    use super::*;
+    locate_test!(zen_stable, browser_locations::zen::locate(RC::Stable));
+    locate_test!(zen_twilight, browser_locations::zen::locate(RC::Twilight));
+    discover_test!(zen_discover, browser_locations::zen::discover());
+    any_test!(zen_any_stable, browser_locations::zen::get_any_zen_stable());
+    any_test!(zen_any_latest, browser_locations::zen::get_any_zen_latest());
+}
 
 // ============================================================
 // General
