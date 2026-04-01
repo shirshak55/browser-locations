@@ -44,3 +44,8 @@ broken_intra_doc_links = "deny"
 all = { level = "deny", priority = 1 }
 redundant_clone = { level = "deny", priority = 2 }
 needless_collect = { level = "warn", priority = 2 }
+
+[workspace.metadata.release]
+shared-version = true
+tag-name = "v{{version}}"
+publish = false
