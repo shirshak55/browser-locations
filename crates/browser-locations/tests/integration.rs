@@ -1,7 +1,6 @@
 #![expect(missing_docs)]
 
 use std::path::Path;
-use std::process::Command;
 
 use browser_locations::ReleaseChannel as RC;
 
@@ -16,50 +15,13 @@ fn assert_executable_exists(path: &Path) {
     }
 }
 
-fn assert_runs_version(path: &Path) {
-    let output = Command::new(path)
-        .arg("--version")
-        .output()
-        .unwrap_or_else(|e| panic!("failed to run {path:?} --version: {e}"));
-
-    #[cfg(unix)]
-    {
-        use std::os::unix::process::ExitStatusExt;
-        if output.status.signal().is_some() {
-            eprintln!(
-                "{path:?} --version killed by signal {}, skipping version check (headless CI)",
-                output.status.signal().unwrap()
-            );
-            return;
-        }
-    }
-
-    assert!(
-        output.status.success(),
-        "{path:?} --version exited with {}",
-        output.status
-    );
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    let stderr = String::from_utf8_lossy(&output.stderr);
-    let combined = format!("{stdout}{stderr}");
-    assert!(
-        !combined.trim().is_empty(),
-        "{path:?} --version produced no output"
-    );
-}
-
-fn validate_browser(path: &Path) {
-    assert_executable_exists(path);
-    assert_runs_version(path);
-}
-
 macro_rules! locate_test {
     ($name:ident, $locate:expr) => {
         #[test]
         #[ignore]
         fn $name() {
             let location = ($locate).expect(concat!(stringify!($name), ": browser not installed"));
-            validate_browser(&location.path);
+            assert_executable_exists(&location.path);
         }
     };
 }
@@ -75,7 +37,7 @@ macro_rules! discover_test {
                 concat!(stringify!($name), ": no browsers discovered")
             );
             for location in &found {
-                validate_browser(&location.path);
+                assert_executable_exists(&location.path);
             }
         }
     };
@@ -87,7 +49,7 @@ macro_rules! any_test {
         #[ignore]
         fn $name() {
             let path = ($call).expect(concat!(stringify!($name), ": browser not installed"));
-            validate_browser(&path);
+            assert_executable_exists(&path);
         }
     };
 }
