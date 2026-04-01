@@ -19,52 +19,46 @@ jobs:
 
       - name: Install Chrome (stable, beta, dev)
         run: |
-          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /usr/share/keyrings/google-chrome.gpg
+          curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /usr/share/keyrings/google-chrome.gpg
           echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
           sudo apt-get update
-          sudo apt-get install -y google-chrome-stable
-          sudo apt-get install -y google-chrome-beta || true
-          sudo apt-get install -y google-chrome-unstable || true
+          sudo apt-get install -y google-chrome-stable google-chrome-beta google-chrome-unstable
 
       - name: Install Chromium
-        run: |
-          sudo apt-get install -y chromium-browser || sudo snap install chromium
+        run: sudo apt-get install -y chromium-browser || sudo snap install chromium
 
       - name: Install Edge (stable, beta, dev)
         run: |
           curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmor -o /usr/share/keyrings/microsoft-edge.gpg
           echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft-edge.gpg] https://packages.microsoft.com/repos/edge stable main" | sudo tee /etc/apt/sources.list.d/microsoft-edge.list
           sudo apt-get update
-          sudo apt-get install -y microsoft-edge-stable
-          sudo apt-get install -y microsoft-edge-beta || true
-          sudo apt-get install -y microsoft-edge-dev || true
+          sudo apt-get install -y microsoft-edge-stable microsoft-edge-beta microsoft-edge-dev
 
-      - name: Install Firefox
-        run: |
-          sudo apt-get install -y firefox
+      - name: Install Firefox (stable)
+        run: sudo apt-get install -y firefox
 
       - name: Install Firefox ESR
-        run: sudo apt-get install -y firefox-esr || true
+        run: sudo apt-get install -y firefox-esr
 
       - name: Install Firefox Beta
         run: |
-          curl -fsSL -o /tmp/firefox-beta.tar.bz2 "https://download.mozilla.org/?product=firefox-beta-latest-ssl&os=linux64&lang=en-US"
+          curl -fsSL -o /tmp/firefox-beta.tar.xz "https://download.mozilla.org/?product=firefox-beta-latest-ssl&os=linux64&lang=en-US"
           sudo mkdir -p /opt/firefox-beta
-          sudo tar -xjf /tmp/firefox-beta.tar.bz2 --strip-components=1 -C /opt/firefox-beta
+          sudo tar -xJf /tmp/firefox-beta.tar.xz --strip-components=1 -C /opt/firefox-beta
           sudo ln -sf /opt/firefox-beta/firefox /usr/bin/firefox-beta
 
       - name: Install Firefox Developer Edition
         run: |
-          curl -fsSL -o /tmp/firefox-devedition.tar.bz2 "https://download.mozilla.org/?product=firefox-devedition-latest-ssl&os=linux64&lang=en-US"
+          curl -fsSL -o /tmp/firefox-devedition.tar.xz "https://download.mozilla.org/?product=firefox-devedition-latest-ssl&os=linux64&lang=en-US"
           sudo mkdir -p /opt/firefox-developer-edition
-          sudo tar -xjf /tmp/firefox-devedition.tar.bz2 --strip-components=1 -C /opt/firefox-developer-edition
+          sudo tar -xJf /tmp/firefox-devedition.tar.xz --strip-components=1 -C /opt/firefox-developer-edition
           sudo ln -sf /opt/firefox-developer-edition/firefox /usr/bin/firefox-developer-edition
 
       - name: Install Firefox Nightly
         run: |
-          curl -fsSL -o /tmp/firefox-nightly.tar.bz2 "https://download.mozilla.org/?product=firefox-nightly-latest-ssl&os=linux64&lang=en-US"
+          curl -fsSL -o /tmp/firefox-nightly.tar.xz "https://download.mozilla.org/?product=firefox-nightly-latest-ssl&os=linux64&lang=en-US"
           sudo mkdir -p /opt/firefox-nightly
-          sudo tar -xjf /tmp/firefox-nightly.tar.bz2 --strip-components=1 -C /opt/firefox-nightly
+          sudo tar -xJf /tmp/firefox-nightly.tar.xz --strip-components=1 -C /opt/firefox-nightly
           sudo ln -sf /opt/firefox-nightly/firefox /usr/bin/firefox-nightly
 
       - name: Install Brave (stable, beta, nightly)
@@ -73,9 +67,7 @@ jobs:
           sudo install -o root -g root -m 644 /tmp/brave-keyring.gpg /usr/share/keyrings/brave-browser-archive-keyring.gpg
           echo "deb [arch=amd64 signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main" | sudo tee /etc/apt/sources.list.d/brave-browser-release.list
           sudo apt-get update
-          sudo apt-get install -y brave-browser
-          sudo apt-get install -y brave-browser-beta || true
-          sudo apt-get install -y brave-browser-nightly || true
+          sudo apt-get install -y brave-browser brave-browser-beta brave-browser-nightly
 
       - name: Install Opera (stable, beta, developer)
         run: |
@@ -84,17 +76,14 @@ jobs:
           echo "deb [signed-by=/usr/share/keyrings/opera.gpg] https://deb.opera.com/opera-beta/ stable non-free" | sudo tee /etc/apt/sources.list.d/opera-beta.list
           echo "deb [signed-by=/usr/share/keyrings/opera.gpg] https://deb.opera.com/opera-developer/ stable non-free" | sudo tee /etc/apt/sources.list.d/opera-developer.list
           sudo apt-get update
-          sudo apt-get install -y opera-stable || true
-          sudo apt-get install -y opera-beta || true
-          sudo apt-get install -y opera-developer || true
+          sudo apt-get install -y opera-stable opera-beta opera-developer
 
       - name: Install Vivaldi (stable, snapshot)
         run: |
           curl -fsSL https://repo.vivaldi.com/archive/linux_signing_key.pub | sudo gpg --dearmor -o /usr/share/keyrings/vivaldi.gpg
           echo "deb [signed-by=/usr/share/keyrings/vivaldi.gpg] https://repo.vivaldi.com/archive/deb/ stable main" | sudo tee /etc/apt/sources.list.d/vivaldi.list
           sudo apt-get update
-          sudo apt-get install -y vivaldi-stable
-          sudo apt-get install -y vivaldi-snapshot || true
+          sudo apt-get install -y vivaldi-stable vivaldi-snapshot
 
       - name: Install LibreWolf
         run: |
@@ -111,8 +100,14 @@ jobs:
           sudo apt-get install -y floorp
 
       - name: Install Zen Browser
+        run: curl -fsSL https://github.com/zen-browser/updates-server/raw/refs/heads/main/install.sh | bash
+
+      - name: Install Helium
         run: |
-          curl -fsSL https://github.com/zen-browser/updates-server/raw/refs/heads/main/install.sh | bash
+          curl -fsSL https://raw.githubusercontent.com/nicoth-in/helium-browser-linux/main/pubkey.asc | sudo gpg --dearmor -o /usr/share/keyrings/helium.gpg
+          echo "deb [signed-by=/usr/share/keyrings/helium.gpg] https://pkg.helium.computer/deb stable main" | sudo tee /etc/apt/sources.list.d/helium.list
+          sudo apt-get update
+          sudo apt-get install -y helium-bin
 
       - name: List installed browsers
         run: |
@@ -124,9 +119,9 @@ jobs:
                      brave-browser brave-browser-beta brave-browser-nightly \
                      opera opera-beta opera-developer \
                      vivaldi vivaldi-stable vivaldi-snapshot \
-                     librewolf floorp zen-browser; do
+                     librewolf floorp zen-browser helium; do
             if command -v "$cmd" &>/dev/null; then
-              echo "  ✓ $cmd: $($cmd --version 2>&1 | head -1)"
+              echo "  ✓ $cmd"
             fi
           done
 
@@ -135,32 +130,53 @@ jobs:
 
   macos:
     runs-on: macos-14
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
 
-      - name: Install Chrome
-        run: brew install --cask google-chrome
-
-      - name: Install Firefox
-        run: brew install --cask firefox
-
-      - name: Install Brave
-        run: brew install --cask brave-browser
-
-      - name: Install Edge
-        run: brew install --cask microsoft-edge
-
-      - name: Install Opera
-        run: brew install --cask opera
-
-      - name: Install Vivaldi
-        run: brew install --cask vivaldi
+      - name: Install Chrome (stable, beta, dev, canary)
+        run: |
+          brew install --cask google-chrome
+          brew install --cask google-chrome@beta
+          brew install --cask google-chrome@dev
+          brew install --cask google-chrome@canary
 
       - name: Install Chromium
         run: brew install --cask chromium
+
+      - name: Install Edge (stable, beta, dev, canary)
+        run: |
+          brew install --cask microsoft-edge
+          brew install --cask microsoft-edge@beta
+          brew install --cask microsoft-edge@dev
+          brew install --cask microsoft-edge@canary
+
+      - name: Install Firefox (stable, beta, developer-edition, nightly, esr)
+        run: |
+          brew install --cask firefox
+          brew install --cask firefox@beta
+          brew install --cask firefox@developer-edition
+          brew install --cask firefox@nightly
+          brew install --cask firefox@esr
+
+      - name: Install Brave (stable, beta, nightly)
+        run: |
+          brew install --cask brave-browser
+          brew install --cask brave-browser@beta
+          brew install --cask brave-browser@nightly
+
+      - name: Install Opera (stable, beta, developer)
+        run: |
+          brew install --cask opera
+          brew install --cask opera@beta
+          brew install --cask opera@developer
+
+      - name: Install Vivaldi (stable, snapshot)
+        run: |
+          brew install --cask vivaldi
+          brew install --cask vivaldi@snapshot
 
       - name: Install Arc
         run: brew install --cask arc
@@ -174,12 +190,20 @@ jobs:
       - name: Install Zen Browser
         run: brew install --cask zen-browser
 
+      - name: Install Helium
+        run: brew install --cask helium-browser
+
       - name: List installed browsers
         run: |
           echo "=== Installed browsers ==="
-          for app in "Google Chrome" "Google Chrome Beta" "Google Chrome Canary" \
-                     "Chromium" "Firefox" "Brave Browser" "Microsoft Edge" \
-                     "Opera" "Vivaldi" "Arc" "LibreWolf" "Floorp" "Zen" "Zen Twilight"; do
+          for app in "Google Chrome" "Google Chrome Beta" "Google Chrome Dev" "Google Chrome Canary" \
+                     "Chromium" \
+                     "Microsoft Edge" "Microsoft Edge Beta" "Microsoft Edge Dev" "Microsoft Edge Canary" \
+                     "Firefox" "Firefox Developer Edition" "Firefox Nightly" \
+                     "Brave Browser" "Brave Browser Beta" "Brave Browser Nightly" \
+                     "Opera" "Opera Beta" "Opera Developer" \
+                     "Vivaldi" "Vivaldi Snapshot" \
+                     "Arc" "LibreWolf" "Floorp" "Zen" "Zen Twilight" "Helium"; do
             app_path="/Applications/${app}.app"
             if [ -d "$app_path" ]; then
               echo "  ✓ ${app}"
@@ -191,7 +215,7 @@ jobs:
 
   windows:
     runs-on: windows-2022
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
@@ -200,20 +224,67 @@ jobs:
       - name: Install Chrome
         run: choco install googlechrome -y --no-progress --ignore-checksums
 
-      - name: Install Firefox
-        run: choco install firefox -y --no-progress --ignore-checksums
+      - name: Install Chromium
+        run: choco install chromium -y --no-progress --ignore-checksums
 
-      - name: Install Brave
-        run: choco install brave -y --no-progress --ignore-checksums
+      - name: Install Firefox (stable, developer, nightly)
+        run: |
+          choco install firefox -y --no-progress --ignore-checksums
+          choco install firefox-dev -y --no-progress --ignore-checksums
+          choco install firefox-nightly -y --no-progress --ignore-checksums
 
-      - name: Install Opera
-        run: choco install opera -y --no-progress --ignore-checksums
+      - name: Install Firefox Beta
+        shell: pwsh
+        run: |
+          $url = "https://download.mozilla.org/?product=firefox-beta-latest-ssl&os=win64&lang=en-US"
+          $installer = "$env:TEMP\firefox-beta.exe"
+          Invoke-WebRequest -Uri $url -OutFile $installer -MaximumRetryCount 3
+          Start-Process -Wait -FilePath $installer -ArgumentList "/S /InstallDirectoryPath=C:\Program Files\Firefox Beta"
+
+      - name: Install Firefox ESR
+        shell: pwsh
+        run: |
+          $url = "https://download.mozilla.org/?product=firefox-esr-latest-ssl&os=win64&lang=en-US"
+          $installer = "$env:TEMP\firefox-esr.exe"
+          Invoke-WebRequest -Uri $url -OutFile $installer -MaximumRetryCount 3
+          Start-Process -Wait -FilePath $installer -ArgumentList "/S /InstallDirectoryPath=C:\Program Files\Firefox ESR"
+
+      - name: Install Brave (stable, nightly)
+        run: |
+          choco install brave -y --no-progress --ignore-checksums
+          choco install brave-nightly -y --no-progress --ignore-checksums
+
+      - name: Install Edge Beta
+        shell: pwsh
+        run: |
+          $url = "https://go.microsoft.com/fwlink/?linkid=2109047&Channel=Beta&language=en&consent=1"
+          $installer = "$env:TEMP\MicrosoftEdgeBeta.msi"
+          Invoke-WebRequest -Uri $url -OutFile $installer -MaximumRetryCount 3
+          Start-Process -Wait msiexec -ArgumentList "/i `"$installer`" /quiet /norestart"
+
+      - name: Install Edge Dev
+        shell: pwsh
+        run: |
+          $url = "https://go.microsoft.com/fwlink/?linkid=2084706&Channel=Dev&language=en&consent=1"
+          $installer = "$env:TEMP\MicrosoftEdgeDev.msi"
+          Invoke-WebRequest -Uri $url -OutFile $installer -MaximumRetryCount 3
+          Start-Process -Wait msiexec -ArgumentList "/i `"$installer`" /quiet /norestart"
+
+      - name: Install Edge Canary
+        shell: pwsh
+        run: |
+          $url = "https://go.microsoft.com/fwlink/?linkid=2084649&Channel=Canary&language=en&consent=1"
+          $installer = "$env:TEMP\MicrosoftEdgeCanary.msi"
+          Invoke-WebRequest -Uri $url -OutFile $installer -MaximumRetryCount 3
+          Start-Process -Wait msiexec -ArgumentList "/i `"$installer`" /quiet /norestart"
+
+      - name: Install Opera (stable, beta)
+        run: |
+          choco install opera -y --no-progress --ignore-checksums
+          choco install opera-beta -y --no-progress --ignore-checksums
 
       - name: Install Vivaldi
         run: choco install vivaldi -y --no-progress --ignore-checksums
-
-      - name: Install Chromium
-        run: choco install chromium -y --no-progress --ignore-checksums
 
       - name: Install LibreWolf
         run: choco install librewolf -y --no-progress --ignore-checksums

@@ -55,13 +55,17 @@ macro_rules! any_test {
 }
 
 // ============================================================
-// Arc
+// Arc (macOS + Windows only)
 // ============================================================
 
-locate_test!(arc_locate, browser_locations::arc::locate(RC::Default));
-discover_test!(arc_discover, browser_locations::arc::discover());
-any_test!(arc_any_stable, browser_locations::arc::get_any_arc_stable());
-any_test!(arc_any_latest, browser_locations::arc::get_any_arc_latest());
+#[cfg(not(target_os = "linux"))]
+mod arc_tests {
+    use super::*;
+    locate_test!(arc_locate, browser_locations::arc::locate(RC::Default));
+    discover_test!(arc_discover, browser_locations::arc::discover());
+    any_test!(arc_any_stable, browser_locations::arc::get_any_arc_stable());
+    any_test!(arc_any_latest, browser_locations::arc::get_any_arc_latest());
+}
 
 // ============================================================
 // Brave — Stable, Beta, Nightly
@@ -87,6 +91,7 @@ any_test!(
 locate_test!(chrome_stable, browser_locations::chrome::locate(RC::Stable));
 locate_test!(chrome_beta, browser_locations::chrome::locate(RC::Beta));
 locate_test!(chrome_dev, browser_locations::chrome::locate(RC::Dev));
+#[cfg(not(target_os = "linux"))]
 locate_test!(chrome_canary, browser_locations::chrome::locate(RC::Canary));
 discover_test!(chrome_discover, browser_locations::chrome::discover());
 any_test!(
@@ -123,6 +128,7 @@ any_test!(
 locate_test!(edge_stable, browser_locations::edge::locate(RC::Stable));
 locate_test!(edge_beta, browser_locations::edge::locate(RC::Beta));
 locate_test!(edge_dev, browser_locations::edge::locate(RC::Dev));
+#[cfg(not(target_os = "linux"))]
 locate_test!(edge_canary, browser_locations::edge::locate(RC::Canary));
 discover_test!(edge_discover, browser_locations::edge::discover());
 any_test!(
