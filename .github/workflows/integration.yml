@@ -48,21 +48,21 @@ jobs:
 
       - name: Install Firefox Beta
         run: |
-          wget -q -O /tmp/firefox-beta.tar.bz2 "https://download.mozilla.org/?product=firefox-beta-latest-ssl&os=linux64&lang=en-US"
+          curl -fsSL -o /tmp/firefox-beta.tar.bz2 "https://download.mozilla.org/?product=firefox-beta-latest-ssl&os=linux64&lang=en-US"
           sudo mkdir -p /opt/firefox-beta
           sudo tar -xjf /tmp/firefox-beta.tar.bz2 --strip-components=1 -C /opt/firefox-beta
           sudo ln -sf /opt/firefox-beta/firefox /usr/bin/firefox-beta
 
       - name: Install Firefox Developer Edition
         run: |
-          wget -q -O /tmp/firefox-devedition.tar.bz2 "https://download.mozilla.org/?product=firefox-devedition-latest-ssl&os=linux64&lang=en-US"
+          curl -fsSL -o /tmp/firefox-devedition.tar.bz2 "https://download.mozilla.org/?product=firefox-devedition-latest-ssl&os=linux64&lang=en-US"
           sudo mkdir -p /opt/firefox-developer-edition
           sudo tar -xjf /tmp/firefox-devedition.tar.bz2 --strip-components=1 -C /opt/firefox-developer-edition
           sudo ln -sf /opt/firefox-developer-edition/firefox /usr/bin/firefox-developer-edition
 
       - name: Install Firefox Nightly
         run: |
-          wget -q -O /tmp/firefox-nightly.tar.bz2 "https://download.mozilla.org/?product=firefox-nightly-latest-ssl&os=linux64&lang=en-US"
+          curl -fsSL -o /tmp/firefox-nightly.tar.bz2 "https://download.mozilla.org/?product=firefox-nightly-latest-ssl&os=linux64&lang=en-US"
           sudo mkdir -p /opt/firefox-nightly
           sudo tar -xjf /tmp/firefox-nightly.tar.bz2 --strip-components=1 -C /opt/firefox-nightly
           sudo ln -sf /opt/firefox-nightly/firefox /usr/bin/firefox-nightly
