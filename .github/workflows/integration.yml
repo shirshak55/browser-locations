@@ -211,26 +211,26 @@ jobs:
       - uses: Swatinem/rust-cache@v2
 
       - name: Install Chrome
-        run: choco install googlechrome -y --no-progress
+        run: choco install googlechrome -y --no-progress --ignore-checksums
 
       - name: Install Firefox
-        run: choco install firefox -y --no-progress
+        run: choco install firefox -y --no-progress --ignore-checksums
 
       - name: Install Brave
-        run: choco install brave -y --no-progress
+        run: choco install brave -y --no-progress --ignore-checksums
 
       - name: Install Opera
-        run: choco install opera -y --no-progress
+        run: choco install opera -y --no-progress --ignore-checksums
 
       - name: Install Vivaldi
-        run: choco install vivaldi -y --no-progress
+        run: choco install vivaldi -y --no-progress --ignore-checksums
 
       - name: Install Chromium
-        run: choco install chromium -y --no-progress
+        run: choco install chromium -y --no-progress --ignore-checksums
         continue-on-error: true
 
       - name: Install LibreWolf
-        run: choco install librewolf -y --no-progress
+        run: choco install librewolf -y --no-progress --ignore-checksums
         continue-on-error: true
 
       - name: Run integration tests
