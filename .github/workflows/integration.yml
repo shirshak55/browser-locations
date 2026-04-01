@@ -108,7 +108,7 @@ jobs:
 
       - name: Install Zen Browser
         run: |
-          mkdir -p "$HOME/.local/bin"
+          mkdir -p "$HOME/.local/bin" "$HOME/.local/share/applications"
           curl -fsSL https://github.com/zen-browser/updates-server/raw/refs/heads/main/install.sh | bash
 
       - name: Install Zen Browser Twilight
@@ -348,7 +348,11 @@ jobs:
 
       - name: Install Floorp
         shell: pwsh
-        run: winget install --id Ablaze.Floorp --silent --accept-package-agreements --accept-source-agreements
+        run: |
+          $release = Invoke-RestMethod -Uri "https://api.github.com/repos/Floorp-Projects/Floorp/releases/latest"
+          $asset = $release.assets | Where-Object { $_.name -match "floorp.*win64.*exe" -and $_.name -notmatch "portable" } | Select-Object -First 1
+          Invoke-WebRequest -Uri $asset.browser_download_url -OutFile "$env:TEMP\floorp-setup.exe" -MaximumRetryCount 3
+          Start-Process -Wait -FilePath "$env:TEMP\floorp-setup.exe" -ArgumentList '/S'
 
       - name: Run integration tests
         run: cargo test -p browser-locations --all-features -- --ignored
