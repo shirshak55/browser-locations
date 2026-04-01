@@ -1198,7 +1198,7 @@ const OPERA_STABLE_LINUX: [Candidate; 2] = [
 ];
 const OPERA_BETA_MACOS: [Candidate; 1] = [candidate(
     CandidateKind::KnownLocation,
-    "/Applications/Opera Beta.app/Contents/MacOS/Opera Beta",
+    "/Applications/Opera Beta.app/Contents/MacOS/Opera",
 )];
 const OPERA_BETA_WINDOWS: [Candidate; 1] = [candidate(
     CandidateKind::KnownLocation,
@@ -1210,7 +1210,7 @@ const OPERA_BETA_LINUX: [Candidate; 2] = [
 ];
 const OPERA_DEV_MACOS: [Candidate; 1] = [candidate(
     CandidateKind::KnownLocation,
-    "/Applications/Opera Developer.app/Contents/MacOS/Opera Developer",
+    "/Applications/Opera Developer.app/Contents/MacOS/Opera",
 )];
 const OPERA_DEV_WINDOWS: [Candidate; 1] = [candidate(
     CandidateKind::KnownLocation,
@@ -1427,7 +1427,7 @@ const ZEN_STABLE_LINUX: [Candidate; 2] = [
 ];
 const ZEN_TWILIGHT_MACOS: [Candidate; 1] = [candidate(
     CandidateKind::KnownLocation,
-    "/Applications/Zen Twilight.app/Contents/MacOS/zen",
+    "/Applications/Twilight.app/Contents/MacOS/zen",
 )];
 const ZEN_TWILIGHT_WINDOWS: [Candidate; 2] = [
     candidate(

@@ -106,10 +106,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y floorp
 
-      - name: Install Zen Browser (stable, twilight)
+      - name: Install Zen Browser
+        run: curl -fsSL https://github.com/zen-browser/updates-server/raw/refs/heads/main/install.sh | bash
+
+      - name: Install Zen Browser Twilight
         run: |
-          curl -fsSL https://github.com/zen-browser/updates-server/raw/refs/heads/main/install.sh | bash
-          curl -fsSL https://github.com/zen-browser/updates-server/raw/refs/heads/main/install-twilight.sh | bash
+          curl -fsSL https://github.com/zen-browser/updates-server/raw/refs/heads/main/install-twilight.sh | $SHELL
+          sudo ln -sf "$HOME/.tarball-installations/zen-twilight/zen-browser-twilight" /usr/bin/zen-browser-twilight || \
+            sudo ln -sf "$HOME/.tarball-installations/zen-twilight/zen" /usr/bin/zen-browser-twilight
 
       - name: Install Helium
         run: |
@@ -296,36 +300,52 @@ jobs:
         shell: pwsh
         run: |
           Invoke-WebRequest -Uri "https://download.mozilla.org/?product=firefox-esr-latest-ssl&os=win64&lang=en-US" -OutFile "$env:TEMP\firefox-esr.exe" -MaximumRetryCount 3
-          Start-Process -Wait -FilePath "$env:TEMP\firefox-esr.exe" -ArgumentList '/S', '/InstallDirectoryPath=C:\Program Files\Firefox ESR'
+          Start-Process -Wait -FilePath "$env:TEMP\firefox-esr.exe" -ArgumentList '/S', '/InstallDirectoryPath=C:\Program Files\Mozilla Firefox ESR'
 
-      - name: Install Brave (stable, nightly)
+      - name: Install Brave
+        run: choco install brave -y --no-progress --ignore-checksums
+
+      - name: Install Brave Nightly
+        run: choco install brave-nightly -y --no-progress --ignore-checksums --pre
+
+      - name: Install Chrome Beta
+        shell: pwsh
         run: |
-          choco install brave -y --no-progress --ignore-checksums
-          choco install brave-nightly -y --no-progress --ignore-checksums --pre
+          Invoke-WebRequest -Uri "https://dl.google.com/tag/s/appguid%3D%7B8237E44A-0054-442C-B6B6-EA0509993955%7D%26ap%3D-arch_x64-statsdef_1%261.1%26installerdata%3D%257B%2522homepage%2522%253A%2522https%253A%252F%252Fwww.google.com%252Fchrome%252Fbeta%252F%2522%257D/update2/installers/ChromeBetaSetup.exe" -OutFile "$env:TEMP\ChromeBetaSetup.exe" -MaximumRetryCount 3
+          Start-Process -Wait -FilePath "$env:TEMP\ChromeBetaSetup.exe" -ArgumentList '/silent', '/install'
+          Start-Sleep -Seconds 15
+
+      - name: Install Chrome Dev
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri "https://dl.google.com/tag/s/appguid%3D%7B401C381F-E0DE-4B85-8BD8-3F3F14FBDA57%7D%26ap%3D-arch_x64-statsdef_1%262.0%26installerdata%3D%257B%2522homepage%2522%253A%2522https%253A%252F%252Fwww.google.com%252Fchrome%252Fdev%252F%2522%257D/update2/installers/ChromeDevSetup.exe" -OutFile "$env:TEMP\ChromeDevSetup.exe" -MaximumRetryCount 3
+          Start-Process -Wait -FilePath "$env:TEMP\ChromeDevSetup.exe" -ArgumentList '/silent', '/install'
+          Start-Sleep -Seconds 15
+
+      - name: Install Chrome Canary
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri "https://dl.google.com/tag/s/appguid%3D%7B4EA16AC7-FD5A-47C3-875B-DBF4A2008C20%7D%26ap%3D-arch_x64-statsdef_1%261.1%26installerdata%3D%257B%2522homepage%2522%253A%2522https%253A%252F%252Fwww.google.com%252Fchrome%252Fcanary%252F%2522%257D/update2/installers/ChromeCanarySetup.exe" -OutFile "$env:TEMP\ChromeCanarySetup.exe" -MaximumRetryCount 3
+          Start-Process -Wait -FilePath "$env:TEMP\ChromeCanarySetup.exe" -ArgumentList '/silent', '/install'
+          Start-Sleep -Seconds 15
 
       - name: Install Edge Beta
         shell: pwsh
         run: |
-          $url = "https://go.microsoft.com/fwlink/?linkid=2109047&Channel=Beta&language=en&consent=1"
-          $installer = "$env:TEMP\MicrosoftEdgeBeta.msi"
-          Invoke-WebRequest -Uri $url -OutFile $installer -MaximumRetryCount 3
-          Start-Process -Wait msiexec -ArgumentList "/i `"$installer`" /quiet /norestart"
+          Invoke-WebRequest -Uri "https://go.microsoft.com/fwlink/?linkid=2109047&Channel=Beta&language=en&consent=1" -OutFile "$env:TEMP\MicrosoftEdgeBeta.msi" -MaximumRetryCount 3
+          Start-Process -Wait msiexec -ArgumentList "/i `"$env:TEMP\MicrosoftEdgeBeta.msi`" /quiet /norestart"
 
       - name: Install Edge Dev
         shell: pwsh
         run: |
-          $url = "https://go.microsoft.com/fwlink/?linkid=2084706&Channel=Dev&language=en&consent=1"
-          $installer = "$env:TEMP\MicrosoftEdgeDev.msi"
-          Invoke-WebRequest -Uri $url -OutFile $installer -MaximumRetryCount 3
-          Start-Process -Wait msiexec -ArgumentList "/i `"$installer`" /quiet /norestart"
+          Invoke-WebRequest -Uri "https://go.microsoft.com/fwlink/?linkid=2084706&Channel=Dev&language=en&consent=1" -OutFile "$env:TEMP\MicrosoftEdgeDev.msi" -MaximumRetryCount 3
+          Start-Process -Wait msiexec -ArgumentList "/i `"$env:TEMP\MicrosoftEdgeDev.msi`" /quiet /norestart"
 
       - name: Install Edge Canary
         shell: pwsh
         run: |
-          $url = "https://go.microsoft.com/fwlink/?linkid=2084649&Channel=Canary&language=en&consent=1"
-          $installer = "$env:TEMP\MicrosoftEdgeCanary.msi"
-          Invoke-WebRequest -Uri $url -OutFile $installer -MaximumRetryCount 3
-          Start-Process -Wait msiexec -ArgumentList "/i `"$installer`" /quiet /norestart"
+          Invoke-WebRequest -Uri "https://go.microsoft.com/fwlink/?linkid=2084649&Channel=Canary&language=en&consent=1" -OutFile "$env:TEMP\MicrosoftEdgeCanary.msi" -MaximumRetryCount 3
+          Start-Process -Wait msiexec -ArgumentList "/i `"$env:TEMP\MicrosoftEdgeCanary.msi`" /quiet /norestart"
 
       - name: Install Opera
         run: choco install opera -y --no-progress --ignore-checksums
@@ -338,6 +358,10 @@ jobs:
 
       - name: Install LibreWolf
         run: choco install librewolf -y --no-progress --ignore-checksums
+
+      - name: Install Floorp
+        shell: pwsh
+        run: winget install --id Ablaze.Floorp --silent --accept-package-agreements --accept-source-agreements
 
       - name: Run integration tests
         run: cargo test -p browser-locations --all-features -- --ignored
