@@ -23,6 +23,7 @@ jobs:
           echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
           sudo apt-get update
           sudo apt-get install -y google-chrome-stable google-chrome-beta google-chrome-unstable
+          sudo find /etc/apt/sources.list.d/ -name 'google-chrome*' ! -name 'google-chrome.list' -delete
 
       - name: Install Chromium
         run: sudo apt-get install -y chromium-browser || sudo snap install chromium
@@ -33,6 +34,7 @@ jobs:
           echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft-edge.gpg] https://packages.microsoft.com/repos/edge stable main" | sudo tee /etc/apt/sources.list.d/microsoft-edge.list
           sudo apt-get update
           sudo apt-get install -y microsoft-edge-stable microsoft-edge-beta microsoft-edge-dev
+          sudo find /etc/apt/sources.list.d/ -name 'microsoft-edge*' ! -name 'microsoft-edge.list' -delete
 
       - name: Install Firefox (stable)
         run: sudo apt-get install -y firefox
