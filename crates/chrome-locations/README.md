@@ -2,9 +2,8 @@
 
 Locate Google Chrome executables on macOS, Windows, and Linux.
 
-```toml
-[dependencies]
-chrome-locations = "0.1"
+```bash
+cargo add chrome-locations
 ```
 
 ## Quick start

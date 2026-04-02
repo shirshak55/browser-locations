@@ -2,9 +2,8 @@
 
 Locate Microsoft Edge executables on macOS, Windows, and Linux.
 
-```toml
-[dependencies]
-edge-locations = "0.1"
+```bash
+cargo add edge-locations
 ```
 
 ## Quick start

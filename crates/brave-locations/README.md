@@ -2,9 +2,8 @@
 
 Locate Brave Browser executables on macOS, Windows, and Linux.
 
-```toml
-[dependencies]
-brave-locations = "0.1"
+```bash
+cargo add brave-locations
 ```
 
 ## Quick start

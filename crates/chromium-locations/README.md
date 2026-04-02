@@ -2,9 +2,8 @@
 
 Locate Chromium executables on macOS, Windows, and Linux.
 
-```toml
-[dependencies]
-chromium-locations = "0.1"
+```bash
+cargo add chromium-locations
 ```
 
 ## Quick start

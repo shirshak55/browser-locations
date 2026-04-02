@@ -3,9 +3,8 @@
 Shared browser executable discovery engine and typed models used by the
 [browser-locations](https://crates.io/crates/browser-locations) family of crates.
 
-```toml
-[dependencies]
-browser-locations-core = "0.1"
+```bash
+cargo add browser-locations-core
 ```
 
 ## Quick start

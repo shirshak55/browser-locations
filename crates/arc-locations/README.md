@@ -2,9 +2,8 @@
 
 Locate Arc Browser executables on macOS and Windows.
 
-```toml
-[dependencies]
-arc-locations = "0.1"
+```bash
+cargo add arc-locations
 ```
 
 ## Quick start

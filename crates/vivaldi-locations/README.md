@@ -2,9 +2,8 @@
 
 Locate Vivaldi executables on macOS, Windows, and Linux.
 
-```toml
-[dependencies]
-vivaldi-locations = "0.1"
+```bash
+cargo add vivaldi-locations
 ```
 
 ## Quick start

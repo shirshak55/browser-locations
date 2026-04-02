@@ -2,9 +2,8 @@
 
 Locate Zen Browser executables on macOS, Windows, and Linux.
 
-```toml
-[dependencies]
-zen-locations = "0.1"
+```bash
+cargo add zen-locations
 ```
 
 ## Quick start

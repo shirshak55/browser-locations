@@ -2,9 +2,8 @@
 
 Locate LibreWolf executables on macOS, Windows, and Linux.
 
-```toml
-[dependencies]
-librewolf-locations = "0.1"
+```bash
+cargo add librewolf-locations
 ```
 
 ## Quick start

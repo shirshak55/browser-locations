@@ -2,9 +2,8 @@
 
 Locate Opera executables on macOS, Windows, and Linux.
 
-```toml
-[dependencies]
-opera-locations = "0.1"
+```bash
+cargo add opera-locations
 ```
 
 ## Quick start

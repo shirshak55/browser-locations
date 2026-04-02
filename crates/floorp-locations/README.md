@@ -2,9 +2,8 @@
 
 Locate Floorp executables on macOS, Windows, and Linux.
 
-```toml
-[dependencies]
-floorp-locations = "0.1"
+```bash
+cargo add floorp-locations
 ```
 
 ## Quick start

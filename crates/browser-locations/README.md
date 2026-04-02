@@ -4,9 +4,8 @@ Umbrella crate for discovering browser executables on macOS, Windows, and Linux.
 Provides generic dispatch functions plus feature-gated access to every
 per-browser crate.
 
-```toml
-[dependencies]
-browser-locations = "0.1"
+```bash
+cargo add browser-locations
 ```
 
 ## Quick start

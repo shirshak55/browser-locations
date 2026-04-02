@@ -2,9 +2,8 @@
 
 Locate Mozilla Firefox executables on macOS, Windows, and Linux.
 
-```toml
-[dependencies]
-firefox-locations = "0.1"
+```bash
+cargo add firefox-locations
 ```
 
 ## Quick start

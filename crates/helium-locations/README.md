@@ -2,9 +2,8 @@
 
 Locate Helium executables on macOS, Windows, and Linux.
 
-```toml
-[dependencies]
-helium-locations = "0.1"
+```bash
+cargo add helium-locations
 ```
 
 ## Quick start
