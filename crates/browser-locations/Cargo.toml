@@ -40,19 +40,19 @@ vivaldi = ["dep:vivaldi-locations"]
 zen = ["dep:zen-locations"]
 
 [dependencies]
-arc-locations = { path = "../arc-locations", version = "0.2.1", optional = true }
-brave-locations = { path = "../brave-locations", version = "0.2.1", optional = true }
-browser-locations-core = { path = "../browser-locations-core", version = "0.2.1" }
-chrome-locations = { path = "../chrome-locations", version = "0.2.1", optional = true }
-chromium-locations = { path = "../chromium-locations", version = "0.2.1", optional = true }
-edge-locations = { path = "../edge-locations", version = "0.2.1", optional = true }
-firefox-locations = { path = "../firefox-locations", version = "0.2.1", optional = true }
-floorp-locations = { path = "../floorp-locations", version = "0.2.1", optional = true }
-helium-locations = { path = "../helium-locations", version = "0.2.1", optional = true }
-librewolf-locations = { path = "../librewolf-locations", version = "0.2.1", optional = true }
-opera-locations = { path = "../opera-locations", version = "0.2.1", optional = true }
-vivaldi-locations = { path = "../vivaldi-locations", version = "0.2.1", optional = true }
-zen-locations = { path = "../zen-locations", version = "0.2.1", optional = true }
+arc-locations = { path = "../arc-locations", version = "0.2.2", optional = true }
+brave-locations = { path = "../brave-locations", version = "0.2.2", optional = true }
+browser-locations-core = { path = "../browser-locations-core", version = "0.2.2" }
+chrome-locations = { path = "../chrome-locations", version = "0.2.2", optional = true }
+chromium-locations = { path = "../chromium-locations", version = "0.2.2", optional = true }
+edge-locations = { path = "../edge-locations", version = "0.2.2", optional = true }
+firefox-locations = { path = "../firefox-locations", version = "0.2.2", optional = true }
+floorp-locations = { path = "../floorp-locations", version = "0.2.2", optional = true }
+helium-locations = { path = "../helium-locations", version = "0.2.2", optional = true }
+librewolf-locations = { path = "../librewolf-locations", version = "0.2.2", optional = true }
+opera-locations = { path = "../opera-locations", version = "0.2.2", optional = true }
+vivaldi-locations = { path = "../vivaldi-locations", version = "0.2.2", optional = true }
+zen-locations = { path = "../zen-locations", version = "0.2.2", optional = true }
 
 [lints]
 workspace = true

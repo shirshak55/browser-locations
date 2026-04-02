@@ -12,7 +12,7 @@ keywords.workspace = true
 readme = "README.md"
 
 [dependencies]
-browser-locations-core = { path = "../browser-locations-core", version = "0.2.1" }
+browser-locations-core = { path = "../browser-locations-core", version = "0.2.2" }
 
 [lints]
 workspace = true
