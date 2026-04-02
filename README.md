@@ -2,24 +2,30 @@
 
 Get the location of various browser paths for automations.
 
-## Crates
+## Installation
 
-- workspace members live under `crates/`
-- `browser-locations-core`: shared lookup engine, types, and browser definitions
-- `browser-locations`: umbrella crate with generic dispatch and optional re-exports
-- browser-specific crates:
-  - `chrome-locations`
-  - `chromium-locations`
-  - `edge-locations`
-  - `firefox-locations`
-  - `brave-locations`
-  - `opera-locations`
-  - `vivaldi-locations`
-  - `arc-locations`
-  - `helium-locations`
-  - `librewolf-locations`
-  - `floorp-locations`
-  - `zen-locations`
+For all browsers via the umbrella crate:
+
+```bash
+cargo add browser-locations
+```
+
+Or pick only the browsers you need:
+
+```bash
+cargo add chrome-locations
+cargo add chromium-locations
+cargo add edge-locations
+cargo add firefox-locations
+cargo add brave-locations
+cargo add opera-locations
+cargo add vivaldi-locations
+cargo add arc-locations
+cargo add helium-locations
+cargo add librewolf-locations
+cargo add floorp-locations
+cargo add zen-locations
+```
 
 ## API Shape
 
