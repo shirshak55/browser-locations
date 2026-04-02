@@ -23,7 +23,8 @@ jobs:
           echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
           sudo apt-get update
           sudo apt-get install -y google-chrome-stable google-chrome-beta google-chrome-unstable
-          sudo find /etc/apt/sources.list.d/ -name 'google-chrome*' ! -name 'google-chrome.list' -delete
+          sudo rm -f /etc/apt/sources.list.d/google-chrome*.list /etc/apt/sources.list.d/google-chrome*.sources
+          echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
 
       - name: Install Chromium
         run: sudo apt-get install -y chromium-browser || sudo snap install chromium
