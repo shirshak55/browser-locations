@@ -86,6 +86,7 @@ jobs:
           echo "deb [signed-by=/usr/share/keyrings/opera.gpg] https://deb.opera.com/opera-stable/ stable non-free" | sudo tee /etc/apt/sources.list.d/opera-stable.list
           echo "deb [signed-by=/usr/share/keyrings/opera.gpg] https://deb.opera.com/opera-beta/ stable non-free" | sudo tee /etc/apt/sources.list.d/opera-beta.list
           echo "deb [signed-by=/usr/share/keyrings/opera.gpg] https://deb.opera.com/opera-developer/ stable non-free" | sudo tee /etc/apt/sources.list.d/opera-developer.list
+          sudo grep -rl chrome-nightly /etc/apt/sources.list.d/ 2>/dev/null | xargs -r sudo rm -f
           sudo apt-get update
           sudo apt-get install -y opera-stable opera-beta opera-developer
 
@@ -93,6 +94,7 @@ jobs:
         run: |
           curl -fsSL https://repo.vivaldi.com/archive/linux_signing_key.pub | sudo gpg --dearmor -o /usr/share/keyrings/vivaldi.gpg
           echo "deb [signed-by=/usr/share/keyrings/vivaldi.gpg] https://repo.vivaldi.com/archive/deb/ stable main" | sudo tee /etc/apt/sources.list.d/vivaldi.list
+          sudo grep -rl chrome-nightly /etc/apt/sources.list.d/ 2>/dev/null | xargs -r sudo rm -f
           sudo apt-get update
           sudo apt-get install -y vivaldi-stable vivaldi-snapshot
 
@@ -100,6 +102,7 @@ jobs:
         run: |
           sudo apt-get install -y extrepo
           sudo extrepo enable librewolf
+          sudo grep -rl chrome-nightly /etc/apt/sources.list.d/ 2>/dev/null | xargs -r sudo rm -f
           sudo apt-get update
           sudo apt-get install -y librewolf
 
@@ -107,6 +110,7 @@ jobs:
         run: |
           curl -fsSL https://ppa.floorp.app/KEY.gpg | sudo gpg --dearmor -o /usr/share/keyrings/Floorp.gpg
           sudo curl -sS --compressed -o /etc/apt/sources.list.d/Floorp.list "https://ppa.floorp.app/Floorp.list"
+          sudo grep -rl chrome-nightly /etc/apt/sources.list.d/ 2>/dev/null | xargs -r sudo rm -f
           sudo apt-get update
           sudo apt-get install -y floorp
 
@@ -125,6 +129,7 @@ jobs:
         run: |
           curl -fsSL https://raw.githubusercontent.com/imputnet/helium-linux/main/pubkey.asc | sudo gpg --dearmor -o /usr/share/keyrings/helium.gpg
           echo "deb [signed-by=/usr/share/keyrings/helium.gpg] https://pkg.helium.computer/deb stable main" | sudo tee /etc/apt/sources.list.d/helium.list
+          sudo grep -rl chrome-nightly /etc/apt/sources.list.d/ 2>/dev/null | xargs -r sudo rm -f
           sudo apt-get update
           sudo apt-get install -y helium-bin
 
