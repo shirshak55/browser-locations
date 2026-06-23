@@ -1817,7 +1817,10 @@ mod tests {
     fn locate_helium_prefers_user_launcher_over_shadowed_system_launcher() {
         let environment = TestEnvironment::new(Platform::Linux)
             .with_var("XDG_DATA_HOME", "/home/tester/.local/share")
-            .with_var("XDG_DATA_DIRS", "/opt/share:/usr/share")
+            .with_var(
+                "XDG_DATA_DIRS",
+                env::join_paths(["/opt/share", "/usr/share"]).unwrap(),
+            )
             .with_file(
                 "/home/tester/.local/share/applications/helium.desktop",
                 "[Desktop Entry]\nTryExec=/home/tester/Apps/helium.appimage\n",
@@ -1931,7 +1934,7 @@ mod tests {
         // the match must come through the desktop entry's own PATH fallback.
         let environment = TestEnvironment::new(Platform::Linux)
             .with_var("HOME", "/home/tester")
-            .with_var("PATH", "/opt/bin:/usr/bin")
+            .with_var("PATH", env::join_paths(["/opt/bin", "/usr/bin"]).unwrap())
             .with_file(
                 "/home/tester/.local/share/applications/helium.desktop",
                 "[Desktop Entry]\nExec=helium-bin %U\n",
