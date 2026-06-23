@@ -29,7 +29,7 @@ for loc in discover_installed() {
 | `Browser` | Enum of supported browsers (Arc, Brave, Chrome, Chromium, Edge, Firefox, Floorp, Helium, LibreWolf, Opera, Vivaldi, Zen). Has a `Browser::ALL` constant. |
 | `ReleaseChannel` | Enum of release channels (Stable, Beta, Dev, Canary, Nightly, Esr, DeveloperEdition, Snapshot, Twilight). |
 | `Platform` | Enum of host platforms (Macos, Windows, Linux). Has `Platform::current()`. |
-| `ProbeSource` | How a path was found (Override, KnownLocation, PathLookup, Flatpak, Snap). |
+| `ProbeSource` | How a path was found (Override, KnownLocation, PathLookup, Flatpak, Snap, AppImage). |
 | `BrowserLocation` | A discovered executable: `browser`, `channel`, `path`, `platform`, `source`. |
 | `LocateError` | Error enum: `UnsupportedChannel`, `UnsupportedPlatform`, `NotFound`, `NoInstalledVariant`. |
 
@@ -57,4 +57,10 @@ export BROWSER_LOCATIONS_CHROME_STABLE_PATH=/opt/chrome/chrome
 
 ## Supported platforms
 
-macOS, Windows, Linux (including Snap and Flatpak installs).
+macOS, Windows, Linux (including Snap, Flatpak, and AppImage installs).
+
+On Linux, AppImage installs are discovered through their freedesktop `.desktop`
+launcher (`TryExec`/`Exec`), since AppImages live in user-chosen directories and
+are not placed on `PATH`. Launchers are matched by app identity (launcher id,
+`StartupWMClass`, `X-AppImage-Name`, or the launched binary name), so installs
+integrated by any tool are found regardless of the launcher's file name.

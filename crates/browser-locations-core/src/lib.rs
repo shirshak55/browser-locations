@@ -7,9 +7,12 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::env;
 use std::ffi::OsString;
 use std::fmt;
+use std::fs;
 use std::path::{Path, PathBuf};
 
 use thiserror::Error;
+
+mod desktop_entry;
 
 /// Known desktop browsers supported by this workspace.
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash, Ord, PartialOrd)]
@@ -214,6 +217,8 @@ pub enum ProbeSource {
     Flatpak,
     /// A Snap export path.
     Snap,
+    /// An AppImage resolved from a freedesktop `.desktop` launcher entry.
+    AppImage,
 }
 
 /// A discovered browser executable.
@@ -280,6 +285,21 @@ enum CandidateKind {
     PathLookup,
     Flatpak,
     Snap,
+    /// Locate via `.desktop` launcher; the candidate value is an identity token (e.g. `"helium"`).
+    DesktopEntry,
+}
+
+impl CandidateKind {
+    /// The [`ProbeSource`] for matches from template-expanded candidate kinds.
+    const fn template_source(self) -> ProbeSource {
+        match self {
+            Self::KnownLocation => ProbeSource::KnownLocation,
+            Self::PathLookup => ProbeSource::PathLookup,
+            Self::Flatpak => ProbeSource::Flatpak,
+            Self::Snap => ProbeSource::Snap,
+            Self::DesktopEntry => ProbeSource::AppImage,
+        }
+    }
 }
 
 #[derive(Clone, Copy)]
@@ -317,6 +337,8 @@ trait Environment {
     fn current_platform(&self) -> Platform;
     fn get_var(&self, key: &str) -> Option<OsString>;
     fn path_exists(&self, path: &Path) -> bool;
+    fn read_to_string(&self, path: &Path) -> Option<String>;
+    fn read_dir(&self, path: &Path) -> Vec<PathBuf>;
 }
 
 struct SystemEnvironment;
@@ -332,6 +354,19 @@ impl Environment for SystemEnvironment {
 
     fn path_exists(&self, path: &Path) -> bool {
         path.exists()
+    }
+
+    fn read_to_string(&self, path: &Path) -> Option<String> {
+        fs::read_to_string(path).ok()
+    }
+
+    fn read_dir(&self, path: &Path) -> Vec<PathBuf> {
+        let Ok(entries) = fs::read_dir(path) else {
+            return Vec::new();
+        };
+        entries
+            .filter_map(|entry| entry.ok().map(|entry| entry.path()))
+            .collect()
     }
 }
 
@@ -600,19 +635,11 @@ fn resolve_candidate<E: Environment>(
                 .into_iter()
                 .map(|path| ResolvedCandidate {
                     path,
-                    source: match candidate.kind {
-                        CandidateKind::KnownLocation => ProbeSource::KnownLocation,
-                        CandidateKind::Flatpak => ProbeSource::Flatpak,
-                        CandidateKind::Snap => ProbeSource::Snap,
-                        CandidateKind::PathLookup => ProbeSource::PathLookup,
-                    },
+                    source: candidate.kind.template_source(),
                 })
                 .collect()
         }
-        CandidateKind::PathLookup => environment
-            .get_var("PATH")
-            .map(|path| env::split_paths(&path).collect::<Vec<_>>())
-            .unwrap_or_default()
+        CandidateKind::PathLookup => path_lookup_entries(environment)
             .into_iter()
             .map(|entry| entry.join(candidate.value))
             .map(|path| ResolvedCandidate {
@@ -620,7 +647,15 @@ fn resolve_candidate<E: Environment>(
                 source: ProbeSource::PathLookup,
             })
             .collect(),
+        CandidateKind::DesktopEntry => desktop_entry::resolve(candidate.value, environment),
     }
+}
+
+fn path_lookup_entries<E: Environment>(environment: &E) -> Vec<PathBuf> {
+    environment
+        .get_var("PATH")
+        .map(|path| env::split_paths(&path).collect())
+        .unwrap_or_default()
 }
 
 fn expand_template<E: Environment>(template: &str, environment: &E) -> Option<PathBuf> {
@@ -1326,9 +1361,10 @@ const HELIUM_STABLE_WINDOWS: [Candidate; 2] = [
         "{PROGRAMFILES}\\Helium\\Helium.exe",
     ),
 ];
-const HELIUM_STABLE_LINUX: [Candidate; 2] = [
+const HELIUM_STABLE_LINUX: [Candidate; 3] = [
     candidate(CandidateKind::KnownLocation, "/usr/bin/helium"),
     candidate(CandidateKind::PathLookup, "helium"),
+    candidate(CandidateKind::DesktopEntry, "helium"),
 ];
 const HELIUM_CHANNELS: [ChannelDefinition; 1] = [channel(
     ReleaseChannel::Default,
@@ -1537,6 +1573,8 @@ mod tests {
         platform: Platform,
         vars: BTreeMap<String, OsString>,
         existing_paths: BTreeSet<PathBuf>,
+        files: BTreeMap<PathBuf, String>,
+        directories: BTreeMap<PathBuf, Vec<PathBuf>>,
     }
 
     impl TestEnvironment {
@@ -1545,6 +1583,8 @@ mod tests {
                 platform,
                 vars: BTreeMap::new(),
                 existing_paths: BTreeSet::new(),
+                files: BTreeMap::new(),
+                directories: BTreeMap::new(),
             }
         }
 
@@ -1555,6 +1595,21 @@ mod tests {
 
         fn with_path(mut self, path: impl Into<PathBuf>) -> Self {
             self.existing_paths.insert(path.into());
+            self
+        }
+
+        /// Records contents, marks the path existing, and lists it under its
+        /// parent so `read_dir` returns it.
+        fn with_file(mut self, path: impl Into<PathBuf>, contents: impl Into<String>) -> Self {
+            let path = path.into();
+            if let Some(parent) = path.parent() {
+                self.directories
+                    .entry(parent.to_path_buf())
+                    .or_default()
+                    .push(path.clone());
+            }
+            self.existing_paths.insert(path.clone());
+            self.files.insert(path, contents.into());
             self
         }
     }
@@ -1570,6 +1625,14 @@ mod tests {
 
         fn path_exists(&self, path: &Path) -> bool {
             self.existing_paths.contains(path)
+        }
+
+        fn read_to_string(&self, path: &Path) -> Option<String> {
+            self.files.get(path).cloned()
+        }
+
+        fn read_dir(&self, path: &Path) -> Vec<PathBuf> {
+            self.directories.get(path).cloned().unwrap_or_default()
         }
     }
 
@@ -1622,6 +1685,288 @@ mod tests {
                 platform: Platform::Linux,
             }
         ));
+    }
+
+    #[test]
+    fn locate_helium_resolves_appimage_from_self_integrated_desktop_entry() {
+        let environment = TestEnvironment::new(Platform::Linux)
+            .with_var("HOME", "/home/tester")
+            .with_file(
+                "/home/tester/.local/share/applications/helium.desktop",
+                "[Desktop Entry]\n\
+                 Type=Application\n\
+                 Name=Helium\n\
+                 StartupWMClass=helium\n\
+                 X-AppImage-Name=Helium\n\
+                 TryExec=/home/tester/Apps/helium.appimage\n\
+                 Exec=env DESKTOPINTEGRATION=1 /home/tester/Apps/helium.appimage %U\n",
+            )
+            .with_path("/home/tester/Apps/helium.appimage");
+
+        let location =
+            locate_browser_in_environment(Browser::Helium, ReleaseChannel::Default, &environment)
+                .unwrap();
+
+        assert_eq!(
+            location.path,
+            PathBuf::from("/home/tester/Apps/helium.appimage")
+        );
+        assert_eq!(location.source, ProbeSource::AppImage);
+    }
+
+    #[test]
+    fn locate_helium_skips_absolute_env_wrapper_in_exec() {
+        // `/usr/bin/env` exists, so it must not be returned as the browser.
+        let environment = TestEnvironment::new(Platform::Linux)
+            .with_var("HOME", "/home/tester")
+            .with_file(
+                "/home/tester/.local/share/applications/helium.desktop",
+                "[Desktop Entry]\n\
+                 StartupWMClass=helium\n\
+                 Exec=/usr/bin/env VAR=1 /home/tester/Apps/helium.appimage %U\n",
+            )
+            .with_path("/usr/bin/env")
+            .with_path("/home/tester/Apps/helium.appimage");
+
+        let location =
+            locate_browser_in_environment(Browser::Helium, ReleaseChannel::Default, &environment)
+                .unwrap();
+
+        assert_eq!(
+            location.path,
+            PathBuf::from("/home/tester/Apps/helium.appimage")
+        );
+        assert_eq!(location.source, ProbeSource::AppImage);
+    }
+
+    #[test]
+    fn locate_helium_matches_hashed_launcher_via_wm_class_and_exec() {
+        let environment = TestEnvironment::new(Platform::Linux)
+            .with_var("XDG_DATA_HOME", "/home/tester/.local/share")
+            .with_file(
+                "/home/tester/.local/share/applications/appimagekit_d34db33f-Helium.desktop",
+                "[Desktop Entry]\n\
+                 Type=Application\n\
+                 StartupWMClass=helium\n\
+                 Exec=env VAR=1 /opt/helium/Helium-0.12-x86_64.AppImage %U\n",
+            )
+            .with_path("/opt/helium/Helium-0.12-x86_64.AppImage");
+
+        let location =
+            locate_browser_in_environment(Browser::Helium, ReleaseChannel::Default, &environment)
+                .unwrap();
+
+        assert_eq!(
+            location.path,
+            PathBuf::from("/opt/helium/Helium-0.12-x86_64.AppImage")
+        );
+        assert_eq!(location.source, ProbeSource::AppImage);
+    }
+
+    #[test]
+    fn locate_helium_ignores_hidden_desktop_entry() {
+        let environment = TestEnvironment::new(Platform::Linux)
+            .with_var("HOME", "/home/tester")
+            .with_file(
+                "/home/tester/.local/share/applications/helium.desktop",
+                "[Desktop Entry]\nHidden=true\nTryExec=/home/tester/Apps/helium.appimage\n",
+            )
+            .with_path("/home/tester/Apps/helium.appimage");
+
+        let error =
+            locate_browser_in_environment(Browser::Helium, ReleaseChannel::Default, &environment)
+                .unwrap_err();
+
+        assert!(matches!(error, LocateError::NotFound { .. }));
+    }
+
+    #[test]
+    fn locate_helium_ignores_desktop_entry_with_missing_target() {
+        let environment = TestEnvironment::new(Platform::Linux)
+            .with_var("HOME", "/home/tester")
+            .with_file(
+                "/home/tester/.local/share/applications/helium.desktop",
+                "[Desktop Entry]\nTryExec=/home/tester/Apps/helium.appimage\n",
+            );
+
+        let error =
+            locate_browser_in_environment(Browser::Helium, ReleaseChannel::Default, &environment)
+                .unwrap_err();
+
+        assert!(matches!(error, LocateError::NotFound { .. }));
+    }
+
+    #[test]
+    fn locate_helium_ignores_unrelated_desktop_entry() {
+        let environment = TestEnvironment::new(Platform::Linux)
+            .with_var("HOME", "/home/tester")
+            .with_file(
+                "/home/tester/.local/share/applications/firefox.desktop",
+                "[Desktop Entry]\nStartupWMClass=firefox\nExec=/usr/bin/firefox %U\n",
+            )
+            .with_path("/usr/bin/firefox");
+
+        let error =
+            locate_browser_in_environment(Browser::Helium, ReleaseChannel::Default, &environment)
+                .unwrap_err();
+
+        assert!(matches!(error, LocateError::NotFound { .. }));
+    }
+
+    #[test]
+    fn locate_helium_prefers_user_launcher_over_shadowed_system_launcher() {
+        let environment = TestEnvironment::new(Platform::Linux)
+            .with_var("XDG_DATA_HOME", "/home/tester/.local/share")
+            .with_var("XDG_DATA_DIRS", "/opt/share:/usr/share")
+            .with_file(
+                "/home/tester/.local/share/applications/helium.desktop",
+                "[Desktop Entry]\nTryExec=/home/tester/Apps/helium.appimage\n",
+            )
+            .with_file(
+                "/usr/share/applications/helium.desktop",
+                "[Desktop Entry]\nTryExec=/usr/lib/helium/helium\n",
+            )
+            .with_path("/home/tester/Apps/helium.appimage")
+            .with_path("/usr/lib/helium/helium");
+
+        let location =
+            locate_browser_in_environment(Browser::Helium, ReleaseChannel::Default, &environment)
+                .unwrap();
+
+        assert_eq!(
+            location.path,
+            PathBuf::from("/home/tester/Apps/helium.appimage")
+        );
+    }
+
+    #[test]
+    fn locate_helium_honors_hidden_user_launcher_as_deletion_of_system_launcher() {
+        let environment = TestEnvironment::new(Platform::Linux)
+            .with_var("XDG_DATA_HOME", "/home/tester/.local/share")
+            .with_var("XDG_DATA_DIRS", "/usr/share")
+            .with_file(
+                "/home/tester/.local/share/applications/helium.desktop",
+                "[Desktop Entry]\nHidden=true\nTryExec=/home/tester/Apps/helium.appimage\n",
+            )
+            .with_file(
+                "/usr/share/applications/helium.desktop",
+                "[Desktop Entry]\nTryExec=/usr/lib/helium/helium\n",
+            )
+            .with_path("/home/tester/Apps/helium.appimage")
+            .with_path("/usr/lib/helium/helium");
+
+        let error =
+            locate_browser_in_environment(Browser::Helium, ReleaseChannel::Default, &environment)
+                .unwrap_err();
+
+        assert!(matches!(error, LocateError::NotFound { .. }));
+    }
+
+    #[test]
+    fn locate_helium_hidden_launcher_does_not_shadow_differently_named_launcher() {
+        let environment = TestEnvironment::new(Platform::Linux)
+            .with_var("XDG_DATA_HOME", "/home/tester/.local/share")
+            .with_var("XDG_DATA_DIRS", "/usr/share")
+            .with_file(
+                "/home/tester/.local/share/applications/helium.desktop",
+                "[Desktop Entry]\nHidden=true\nTryExec=/home/tester/Apps/helium.appimage\n",
+            )
+            .with_file(
+                "/usr/share/applications/net.imput.helium.desktop",
+                "[Desktop Entry]\nTryExec=/opt/helium/helium.appimage\n",
+            )
+            .with_path("/opt/helium/helium.appimage");
+
+        let location =
+            locate_browser_in_environment(Browser::Helium, ReleaseChannel::Default, &environment)
+                .unwrap();
+
+        assert_eq!(location.path, PathBuf::from("/opt/helium/helium.appimage"));
+        assert_eq!(location.source, ProbeSource::AppImage);
+    }
+
+    #[test]
+    fn locate_helium_falls_back_to_exec_when_try_exec_target_missing() {
+        let environment = TestEnvironment::new(Platform::Linux)
+            .with_var("HOME", "/home/tester")
+            .with_file(
+                "/home/tester/.local/share/applications/helium.desktop",
+                "[Desktop Entry]\n\
+                 TryExec=/home/tester/Apps/helium.appimage\n\
+                 Exec=/opt/helium/helium.bin %U\n",
+            )
+            .with_path("/opt/helium/helium.bin");
+
+        let location =
+            locate_browser_in_environment(Browser::Helium, ReleaseChannel::Default, &environment)
+                .unwrap();
+
+        assert_eq!(location.path, PathBuf::from("/opt/helium/helium.bin"));
+        assert_eq!(location.source, ProbeSource::AppImage);
+    }
+
+    #[test]
+    fn locate_helium_expands_tilde_in_try_exec() {
+        let environment = TestEnvironment::new(Platform::Linux)
+            .with_var("HOME", "/home/tester")
+            .with_file(
+                "/home/tester/.local/share/applications/helium.desktop",
+                "[Desktop Entry]\nTryExec=~/Apps/helium.appimage\n",
+            )
+            .with_path("/home/tester/Apps/helium.appimage");
+
+        let location =
+            locate_browser_in_environment(Browser::Helium, ReleaseChannel::Default, &environment)
+                .unwrap();
+
+        assert_eq!(
+            location.path,
+            PathBuf::from("/home/tester/Apps/helium.appimage")
+        );
+    }
+
+    #[test]
+    fn locate_helium_resolves_bare_exec_via_path() {
+        // `Exec` is a bare name distinct from the plain `helium` PATH probe, so
+        // the match must come through the desktop entry's own PATH fallback.
+        let environment = TestEnvironment::new(Platform::Linux)
+            .with_var("HOME", "/home/tester")
+            .with_var("PATH", "/opt/bin:/usr/bin")
+            .with_file(
+                "/home/tester/.local/share/applications/helium.desktop",
+                "[Desktop Entry]\nExec=helium-bin %U\n",
+            )
+            .with_path("/opt/bin/helium-bin");
+
+        let location =
+            locate_browser_in_environment(Browser::Helium, ReleaseChannel::Default, &environment)
+                .unwrap();
+
+        assert_eq!(location.path, PathBuf::from("/opt/bin/helium-bin"));
+        assert_eq!(location.source, ProbeSource::AppImage);
+    }
+
+    #[test]
+    fn locate_helium_override_takes_precedence_over_desktop_entry() {
+        let environment = TestEnvironment::new(Platform::Linux)
+            .with_var("HOME", "/home/tester")
+            .with_var(
+                "BROWSER_LOCATIONS_HELIUM_DEFAULT_PATH",
+                "/tmp/override-helium",
+            )
+            .with_path("/tmp/override-helium")
+            .with_file(
+                "/home/tester/.local/share/applications/helium.desktop",
+                "[Desktop Entry]\nTryExec=/home/tester/Apps/helium.appimage\n",
+            )
+            .with_path("/home/tester/Apps/helium.appimage");
+
+        let location =
+            locate_browser_in_environment(Browser::Helium, ReleaseChannel::Default, &environment)
+                .unwrap();
+
+        assert_eq!(location.path, PathBuf::from("/tmp/override-helium"));
+        assert_eq!(location.source, ProbeSource::Override);
     }
 
     #[test]
